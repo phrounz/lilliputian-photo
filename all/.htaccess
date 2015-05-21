@@ -1,0 +1,12 @@
+AuthUserFile .htpasswd
+AuthType Basic
+AuthName "My Secret Folder"
+Require valid-user
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+SetEnv PHP_VER 5_4
+Options -Indexes
+<Files ~ "\.albums_conf$">
+	Order allow,deny
+	Deny from all
+</Files>
