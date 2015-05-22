@@ -88,7 +88,7 @@
 						Connected as: <i><?php echo $_SERVER['REMOTE_USER']; ?></i> 
 						(<a href="<?php 
 							$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-							echo $protocol.'logout:nothegoodpassword@'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/logout.php"; ?>">disconnect or change</a>)
+							echo $protocol.'logout:nothegoodpassword@'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/logout.php"; ?>">disconnect or change user</a>)
 					</p>
 					<div id='main'></div>
 				</td>

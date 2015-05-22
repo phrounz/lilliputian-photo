@@ -97,8 +97,8 @@ function showEdition($valbum_array)
 	echo "</ul></div>\n";
 	
 	//----------------------------
-	// Virtual album and group titles
-	echo "\n<div class='admin_box'>\n<h2>Virtual album and group titles</h2>\n"
+	// Virtual albums and group titles
+	echo "\n<div class='admin_box'>\n<h2>Virtual albums and group titles</h2>\n"
 		."<p>This allows to create a visibility on an album or a part of an album, for some authenticated user(s).</p><ul>\n"
 		."<li><form action='".getTargetPage()."' method='POST'><input type='hidden' name='valbum_add__type' value='ALBUM' />\n"
 		."Create a new <b>virtual album</b> named <input type='text' name='valbum_add__title' value='' />"
