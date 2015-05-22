@@ -1,6 +1,8 @@
 .. image:: https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/all/logo.png
 It started as a personal need to share my photographies and videos, in order to replace Google+. See also other stuff my `web site <http://www.volatiledove.com>`_.
 
+Made by me, except the "Thumbnail Image Class for Thumbnail Generator" made by zubrag.com.
+
 What it looks like :
  * `administration: <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/admin.jpg>`_
  * `user albums list page <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/user_list.jpg>`_
