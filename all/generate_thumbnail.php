@@ -1,6 +1,7 @@
 <?php
 	require_once("inc/conf.inc.php");
 	require_once("inc/virtual_albums_conf.inc.php");
+	require_once("inc/media_access.inc.php");
 	
 	// GET arguments
 	if (!isset($_GET['valbum_id']) || !isset($_GET['media_id'])) die("missing arg");
@@ -12,7 +13,7 @@
 	
 	if (!file_exists(CONST_THUMBNAILS_DIR)) mkdir(CONST_THUMBNAILS_DIR);
 	
-	generateThumbnail(CONST_MEDIA_DIR."/$album/$media_id", CONST_THUMBNAILS_DIR."/$album");
+	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumThumbnailDir($album));
 
 	//---------------------------------------------------------------------------
 	

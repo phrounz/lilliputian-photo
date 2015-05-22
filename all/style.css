@@ -107,7 +107,7 @@ textarea
 }
 
 .alb_insight h3 span.admin {
-	background: rgba(128, 0, 0, 0.7);
+	background: rgba(0, 0, 0, 0.7);/*rgba(128, 0, 0, 0.7);*/
 	padding: 10px;
 }
 

@@ -14,6 +14,11 @@ function readComments($album, $media_id)
 
 function insertNewComment($album, $media_id, $new_comment)
 {
+	$new_comment = str_replace("\r", '<br />', str_replace("\n", '<br />', str_replace("|", '&#124;', $new_comment)));
+	
+	if (!file_exists(CONST_COMMENTS_DIR)) mkdir(CONST_COMMENTS_DIR);
+	if (!file_exists(CONST_COMMENTS_DIR."/$album")) mkdir(CONST_COMMENTS_DIR."/$album");
+	
 	$comments_file = getCommentFileFromMedia_($album, $media_id);
 	$connected_user = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
 	file_put_contents($comments_file, (file_exists($comments_file) ? '|':'')."$connected_user=$new_comment", FILE_APPEND);
@@ -78,12 +83,29 @@ function deleteComment_($album, $media_id, $comment_to_delete)
 			$i+=1;
 		}
 		
-		if (count($comments_agr) == 0) unlink($comments_file);
-		else file_put_contents($comments_file, implode('|', $comments_agr));
+		if (count($comments_agr) == 0)
+		{
+			unlink($comments_file);	
+			if (count(glob(dirname($comments_file)."/*"))==0)
+			{
+				rmdir(dirname($comments_file));
+				if (count(glob(CONST_COMMENTS_DIR."/*"))==0)
+				{
+					rmdir(CONST_COMMENTS_DIR);
+				}
+			}
+		}
+		else
+			file_put_contents($comments_file, implode('|', $comments_agr));
 	}
 }
 
-function getCommentFileFromMedia_($album, $media_id) { return CONST_MEDIA_DIR."/$album/".basename($media_id, ".".pathinfo($media_id, PATHINFO_EXTENSION)).".txt"; }
+//----------------------------------------------
+
+function getCommentFileFromMedia_($album, $media_id)
+{
+	return CONST_COMMENTS_DIR."/$album/".basename($media_id, ".".pathinfo($media_id, PATHINFO_EXTENSION)).".txt";
+}
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------------

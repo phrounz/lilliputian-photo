@@ -24,21 +24,24 @@ function listVirtualAlbums()
 					'type' => 'ALBUM',
 					'title' => $alb,
 					'album' => $alb,
-					'from_date' => "0",
-					'to_date' => "INFINITE",
+					'from_date' => null,
+					'to_date' => null,
 					'user' => CONST_ADMIN_USER));
 		}
-		foreach (glob("*.albums_conf") as $album_conf_file)
+		if (file_exists(CONST_ALBUM_CONF_DIR))
 		{
-			foreach (readVirtualAlbumConfFile($album_conf_file) as $valbum_line)
+			foreach (glob(CONST_ALBUM_CONF_DIR."/*") as $album_conf_file)
 			{
-				array_push($valbum_array, $valbum_line);
+				foreach (readVirtualAlbumConfFile($album_conf_file) as $valbum_line)
+				{
+					array_push($valbum_array, $valbum_line);
+				}
 			}
 		}
 	}
 	else
 	{
-		$album_conf_file = file_exists("$connected_user.albums_conf") ? "$connected_user.albums_conf" : CONST_DEFAULT_USER.".albums_conf";
+		$album_conf_file = CONST_ALBUM_CONF_DIR."/".(file_exists(CONST_ALBUM_CONF_DIR."/$connected_user") ? "$connected_user" : CONST_DEFAULT_USER);
 		$valbum_array = readVirtualAlbumConfFile($album_conf_file);
 	}
 
@@ -49,36 +52,39 @@ function listVirtualAlbums()
 
 function createVirtualAlbum($title, $album, $from_date, $to_date, $user)
 {
-	file_put_contents("$user.albums_conf", "ALBUM|$title|$album|$from_date|$to_date\n", FILE_APPEND);
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date\n", FILE_APPEND) !== FALSE;
 }
 
 //----------------------------------------------
 
 function createGroupTitle($title, $user)
 {
-	file_put_contents("$user.albums_conf", "GROUP_TITLE|$title\n", FILE_APPEND);
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "GROUP_TITLE|$title\n", FILE_APPEND) !== FALSE;
 }
 
 //----------------------------------------------
 
 function createNewUser($user)
 {
-	file_put_contents("$user.albums_conf", "", FILE_APPEND);// (append avoids erasing data in case of a mistake)
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "", FILE_APPEND) !== FALSE;// (append avoids erasing data in case of a mistake)
 }
 
 //----------------------------------------------
 
 function createDefaultUserIfNotExists()
 {
-	if (!file_exists(CONST_DEFAULT_USER.".albums_conf")) file_put_contents(CONST_DEFAULT_USER.".albums_conf", "", FILE_APPEND);
+	if (!file_exists(CONST_ALBUM_CONF_DIR)) mkdir(CONST_ALBUM_CONF_DIR);
+	if (!file_exists(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER)) file_put_contents(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER, "", FILE_APPEND);
 }
 
 //----------------------------------------------
 
-function getUsers()
+function getUsers($skip_default)
 {
 	$users = array();
-	foreach (glob("*.albums_conf") as $album_conf_file) array_push($users, basename($album_conf_file, ".albums_conf"));
+	foreach (glob(CONST_ALBUM_CONF_DIR."/*") as $album_conf_file)
+		if (!($skip_default && basename($album_conf_file)==CONST_DEFAULT_USER))
+			array_push($users, basename($album_conf_file));
 	return $users;
 }
 
@@ -86,14 +92,14 @@ function getUsers()
 
 function removeUser($user)
 {
-	unlink("$user.albums_conf");
+	return unlink(CONST_ALBUM_CONF_DIR."/$user");
 }
 
 //----------------------------------------------
 
 function removeVirtualAlbumOrTitle($title, $user)
 {
-	$handle = fopen("$user.albums_conf", "r");
+	$handle = fopen(CONST_ALBUM_CONF_DIR."/$user", "r");
 	$output = '';
 	if (isset($handle))
 	{
@@ -106,7 +112,7 @@ function removeVirtualAlbumOrTitle($title, $user)
 		}
 	}
 	fclose($handle);
-	file_put_contents("$user.albums_conf", $output);
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", $output) !== FALSE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,46 +126,51 @@ function readVirtualAlbumConfFile($album_conf_file)
 	global $global_data1_for_filter;
 	
 	$valbum_array = array();
-	$user = basename($album_conf_file, ".albums_conf");
 	
-	$handle = fopen($album_conf_file, "r");
-	
-	if (isset($handle))
+	if (file_exists($album_conf_file))
 	{
-		while (($data = fgetcsv($handle, 1000, "|")) !== FALSE)
+		$user = basename($album_conf_file);
+		
+		$handle = fopen($album_conf_file, "r");
+		
+		if (isset($handle))
 		{
-			if ($data[0] == 'ALBUM')
+			while (($data = fgetcsv($handle, 1000, "|")) !== FALSE)
 			{
-				array_push($valbum_array, 
-					array( 
-						"type" => $data[0], 
-						"title" => $data[1], 
-						"album" => $data[2], 
-						"from_date" => $data[3], 
-						"to_date" => $data[4], 
-						"user" => $user
-						));
-			}
-			else if ($data[0] == 'GROUP_TITLE') // add a title for a group of virtual albums
-			{
-				array_push($valbum_array, array( "type" => $data[0], "title" => $data[1], "user" => $user ));
-			}
-			else if ($data[0] == 'INCLUDE_FILE') // recursively include another album conf file
-			{
-				foreach (readVirtualAlbumConfFile($data[1]) as $valbum) array_push($valbum_array, $valbum);
-			}
-			else if ($data[0] == 'REMOVE') // remove an album previously mentioned with 'ALBUM'
-			{
-				$global_data1_for_filter = $data[1];
-				$valbum_array = array_filter($valbum_array, function ($a){ global $global_data1_for_filter;return $a['title'] != $global_data1_for_filter; });
-			}
-			else
-			{
-				die("Unknown ".$data[0]." in ".$album_conf_file);
+				if ($data[0] == 'ALBUM')
+				{
+					array_push($valbum_array, 
+						array( 
+							"type" => $data[0], 
+							"title" => $data[1], 
+							"album" => $data[2], 
+							"from_date" => $data[3], 
+							"to_date" => $data[4], 
+							"user" => $user
+							));
+				}
+				else if ($data[0] == 'GROUP_TITLE') // add a title for a group of virtual albums
+				{
+					array_push($valbum_array, array( "type" => $data[0], "title" => $data[1], "user" => $user ));
+				}
+				else if ($data[0] == 'INCLUDE_FILE') // recursively include another album conf file
+				{
+					foreach (readVirtualAlbumConfFile($data[1]) as $valbum) array_push($valbum_array, $valbum);
+				}
+				else if ($data[0] == 'REMOVE') // remove an album previously mentioned with 'ALBUM'
+				{
+					$global_data1_for_filter = $data[1];
+					$valbum_array = array_filter($valbum_array, function ($a){ global $global_data1_for_filter;return $a['title'] != $global_data1_for_filter; });
+				}
+				else
+				{
+					die("Unknown ".$data[0]." in ".$album_conf_file);
+				}
 			}
 		}
+		fclose($handle);
 	}
-	fclose($handle);
+	
 	return $valbum_array;
 }
 

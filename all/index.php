@@ -3,7 +3,9 @@
 	require_once("inc/conf.inc.php");
 	require_once("inc/virtual_albums_conf.inc.php");
 	require_once("inc/media_infos.inc.php");
+	require_once("inc/media_access.inc.php");
 	require_once("inc/comments.inc.php");
+	require_once("inc/admin_interface.inc.php");
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
@@ -50,41 +52,17 @@
 					<h2>
 	
 <?php
+	
 	// POST parameters
 	$new_comment = isset($_POST['new_comment']) ? strip_tags($_POST['new_comment']) : null;
 	$comment_to_delete = isset($_POST['comment_to_delete']) ? strip_tags($_POST['comment_to_delete']) : null;
-	if (isset($new_comment))
-		$new_comment = str_replace("\r", '<br />', str_replace("\n", '<br />', str_replace("|", '&#124;', $new_comment)));
-		
-	// POST virtual album creation/deletion
+	
+	// album and virtual album creations/deletions/modifications
 	$str_pst = '';
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 	{
-		if (isset($_POST['valbum_add__type']) && $_POST['valbum_add__type']=='ALBUM')
-		{
-			VirtualAlbumsConf\createVirtualAlbum($_POST['valbum_add__title'], $_POST['valbum_add__album'], $_POST['valbum_add__beginning'], $_POST['valbum_add__end'], $_POST['valbum_add__user']);
-			$str_pst.="<div class='admin_box'>\n<font color='red'>Virtual album <i>".$_POST['valbum_add__title']."</i> created for user <i>".$_POST['valbum_add__user']."</i>.</font>\n</div>\n";
-		}
-		if (isset($_POST['valbum_add__type']) && $_POST['valbum_add__type']=='GROUP_TITLE')
-		{
-			VirtualAlbumsConf\createGroupTitle($_POST['valbum_add__title'], $_POST['valbum_add__user']);
-			$str_pst.="<div class='admin_box'>\n<font color='red'>Group title <i>".$_POST['valbum_add__title']."</i> created for user <i>".$_POST['valbum_add__user']."</i>.</font>\n</div>\n";
-		}
-		if (isset($_POST['valbum_removal__title']))
-		{
-			VirtualAlbumsConf\removeVirtualAlbumOrTitle($_POST['valbum_removal__title'], $_POST['valbum_removal__user']);
-			$str_pst.="<div class='admin_box'>\n<font color='red'>Virtual album or group title <i>".$_POST['valbum_removal__title']."</i> of user <i>".$_POST['valbum_removal__user']."</i> removed.</font>\n</div>\n";
-		}
-		if (isset($_POST['valbum_newuser']))
-		{
-			VirtualAlbumsConf\createNewUser($_POST['valbum_newuser']);
-			$str_pst.="<div class='admin_box'>\n<font color='red'>Added <i>".$_POST['valbum_newuser']."</i> in specific rights.</font>\n</div>\n";
-		}
-		if (isset($_POST['valbum_removeuser']))
-		{
-			VirtualAlbumsConf\removeUser($_POST['valbum_removeuser']);
-			$str_pst.="<div class='admin_box'>\n<font color='red'>Removed all specific rights of <i>".$_POST['valbum_removeuser']."</i>.</font>\n</div>\n";
-		}
+		list($str_op, $res) = AdminInterface\doPostOperations();
+		if ($str_op!='') $str_pst = "<div class='admin_box'>\n<font color='".($res?'blue':'red')."'>\n$str_op ".($res?'succeeded.':'failed.')."</font>\n</div>\n";
 	}
 	
 	// GET parameters
@@ -103,11 +81,15 @@
 		if (isset($media_id))
 			echo ' &gt; '.basename($media_id, ".".pathinfo($media_id, PATHINFO_EXTENSION));
 	}
-	echo "\n";
 ?>
 
 					</h2>
-					<p>Connected as: <i><?php echo $_SERVER['REMOTE_USER']; ?></i></p>
+					<p>
+						Connected as: <i><?php echo $_SERVER['REMOTE_USER']; ?></i> 
+						(<a href="<?php 
+							$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+							echo $protocol.'logout:nothegoodpassword@'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/logout.php"; ?>">disconnect or change</a>)
+					</p>
 					<div id='main'></div>
 				</td>
 			</tr>
@@ -115,18 +97,14 @@
 	</div>
 
 	<div class='body_contents'>
+<!-- ============================================================================== -->
 
 <?php 
 	echo $str_pst;
 
 	//----------------------------
 	//get album from valbum_id
-	$album = null;
-	if (isset($valbum_id))
-	{
-		if (isset($valbum_array[$valbum_id]))
-			$album = $valbum_array[$valbum_id]["album"];
-	}
+	$album = isset($valbum_id) && isset($valbum_array[$valbum_id]) ? $valbum_array[$valbum_id]["album"] : null;
 
 	//----------------------------
 	// media page
@@ -146,7 +124,7 @@
 	
 		if (isset($valbum_array[$valbum_id]))
 		{
-			showVirtualAlbum($valbum_id, $album, CONST_MEDIA_DIR."/$album", CONST_THUMBNAILS_DIR."/$album", $valbum_array[$valbum_id]["from_date"], $valbum_array[$valbum_id]["to_date"], false);
+			showVirtualAlbum($valbum_id, $album, $valbum_array[$valbum_id]["from_date"], $valbum_array[$valbum_id]["to_date"], false);
 			echo '<script type="text/javascript">if (media_ids_to_process.length > 0){generateThumbnailAjax(media_ids_to_process[0], "'.$valbum_id.'");}</script>'."\n";
 		}
 		else
@@ -158,14 +136,15 @@
 	// list of albums page
 	else
 	{
-		showListOfAlbums($valbum_array, CONST_THUMBNAILS_DIR);
+		showListOfAlbums($valbum_array);
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 		{
-			showVirtualAlbumsEdit($valbum_array);
+			AdminInterface\showEdition($valbum_array);
 		}
 	}
 ?>
 
+<!-- ============================================================================== -->
 	</div>
 
 </body>
@@ -176,15 +155,12 @@
 // functions
 //--------------------------------------------------------------------------
 
-//----------------------------------------------
-
-function showListOfAlbums($valbum_array, $album_thumbnails_root_dir)
+function showListOfAlbums($valbum_array)
 {
 	$curr_user = $_SERVER['REMOTE_USER'];
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 	{
 		echo "\n<div class='admin_box'>\n<h2>Albums</h2><p>An album is a subfolder of the <i>albums/</i> directory. As the administrator, you can see them all.</p>"
-			."<p>The albums must be created manually (with an FTP client, for example).</p>\n"
 			."<p>The thumbnails are automatically generated when watching the album for the first time.</p>\n";
 	}
 		
@@ -196,7 +172,7 @@ function showListOfAlbums($valbum_array, $album_thumbnails_root_dir)
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $valbum['user'] != $curr_user)
 		{
 			$curr_user=$valbum['user'];
-			echo "</tr></table></div>\n<div class='admin_box'><table><tr><td><h2>Virtual albums visible by: <i>".$curr_user."</i></h2></td></tr>\n<tr>";
+			echo "</tr></table></div>\n<div class='admin_box'><table><tr><td><h2>Stuff visible by: <i>".$curr_user."</i></h2></td></tr>\n<tr>";
 			$j=0;
 		}
 			
@@ -209,17 +185,12 @@ function showListOfAlbums($valbum_array, $album_thumbnails_root_dir)
 		{
 			$album_title = $valbum['title'];
 			
-			$album_folder = CONST_MEDIA_DIR."/".$valbum['album'];
-			
-			$media_files_this_album = glob($album_folder."/*");
-			
-			$album_name = basename($album_folder);
 			echo "\n<td class='alb_insight'><a href='".getAlbumUrl($valbum_id)."'>\n"
 				."<h3 style='position:absolute;'>"
 				."<span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"
 				."$album_title</span></h3><span>";// - ".count($media_files_this_album)." elements
 			
-			showVirtualAlbum($valbum_id, $valbum['album'], $album_folder, $album_thumbnails_root_dir."/".basename($album_folder), $valbum["from_date"], $valbum["to_date"], true);
+			showVirtualAlbum($valbum_id, $valbum['album'], $valbum["from_date"], $valbum["to_date"], true);
 			echo "</span></a></td>\n";
 			$j++;
 			if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}
@@ -233,101 +204,11 @@ function showListOfAlbums($valbum_array, $album_thumbnails_root_dir)
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER) echo "</div>\n";
 }
 
-function showVirtualAlbumsEdit($valbum_array)
-{
-	VirtualAlbumsConf\createDefaultUserIfNotExists();
-	
-	//----------------------------
-	// Create a virtual album
-	echo "\n<div class='admin_box'>\n<h2>Create a virtual album</h2>\n"
-		."<p>This allows to create a visibility on an album or a part of an album, for some authenticated user(s).</p>\n"
-		."<p><form action='".getListOfAlbumsUrl()."' method='POST'><input type='hidden' name='valbum_add__type' value='ALBUM' /><ul>\n"
-		."<li>Create a new virtual album named <input type='text' name='valbum_add__title' value='' /></li>"
-		."<li>for user <select name='valbum_add__user'>";
-	foreach (VirtualAlbumsConf\getUsers() as $registered_user) echo "<option>$registered_user</option>";
-	echo "</select><small> (Note: <i>".CONST_DEFAULT_USER."</i> applies to all users without specific rights; if you want to make specific rights for a given user, see below)</small>.</li>"
-		."<li>allowing visibility on the album <select name='valbum_add__album'></li>";
-	foreach (glob(CONST_MEDIA_DIR."/*") as $album_folder) echo "<option>".basename($album_folder)."</option>";
-	echo "</select></li>"
-		."<li>starting from <input type='text' name='valbum_add__beginning' value='0' /><small> (0 means the beginning of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small></li>"
-		."<li>until <input type='text' name='valbum_add__end' value='INFINITE' /><small> (INFINITE means the end of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small></li>"
-		."<li><input type='submit' value='Add virtual album' /></li>\n"
-		."</ul></form></p>\n"
-		."</div>\n";
-		
-	//----------------------------
-	// Create a group title
-	echo "\n<div class='admin_box'>\n<h2>Create a group title</h2>\n"
-		."<p><form action='".getListOfAlbumsUrl()."' method='POST'><input type='hidden' name='valbum_add__type' value='GROUP_TITLE' />\n"
-		."Create a new group title named <input type='text' name='valbum_add__title' value='' /> "
-		."visible by user <select name='valbum_add__user'>";
-	foreach (VirtualAlbumsConf\getUsers() as $registered_user) echo "<option>$registered_user</option>";
-	echo "</select> "
-		."<input type='submit' value='Add group title' />\n"
-		."</form></p>\n"
-		."</div>\n";
-	
-	//----------------------------
-	// Remove a virtual album or a group title
-	echo "\n<div class='admin_box'>\n<h2>Remove a virtual album or a group title</h2>\n";
-	$curr_user = CONST_ADMIN_USER;
-	$i=0;
-	foreach ($valbum_array as $valbum)
-	{
-		if ($valbum['user'] != $curr_user)
-		{
-			if ($curr_user!=CONST_ADMIN_USER) echo "</select></form></p>";
-			$curr_user=$valbum['user'];			
-			echo ""
-				."<p><form action='".getListOfAlbumsUrl()."' method='POST'>"
-				."<input type='hidden' name='valbum_removal__user' value='$curr_user' />"
-				."<input type='submit' value='Remove $curr_user&#39;s' />"
-				."<select name='valbum_removal__title'>";
-			$i+=1;
-		}
-		if ($curr_user!=CONST_ADMIN_USER) echo "<option>".$valbum['title']."</option>";
-	}
-	if ($i > 0) echo "</select></form></p>";
-	else echo "There is no virtual album nor group title to remove.";
-	echo "</div>\n";
-	
-	//----------------------------
-	// Create a new user
-	echo "\n<div class='admin_box'>\n<h2>Create specific rights for a user</h2>\n"
-		."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p>"
-		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
-		."<form action='".getListOfAlbumsUrl()."' method='POST'>\n"
-		."<input type='text' name='valbum_newuser' value='' />"
-		."<input type='submit' value='Add user' />\n"
-		."</form>\n"
-		."</div>\n";
-	
-	//----------------------------
-	// Remove a user
-	$removable_users = array();
-	foreach (VirtualAlbumsConf\getUsers() as $registered_user)
-		if ($registered_user!=CONST_DEFAULT_USER)
-			array_push($removable_users, $registered_user);
-	echo "\n<div class='admin_box'>\n<h2>Remove specific rights for a user</h2>\n";
-	if (count($removable_users) > 0)
-	{
-		echo "<p>Note: a removed user still gets <i>".CONST_DEFAULT_USER."</i> virtual albums.</p>";
-		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
-		echo "<form action='".getListOfAlbumsUrl()."' method='POST'><select name='valbum_removeuser'></li>";
-		foreach ($removable_users as $removable_user) echo "<option>$removable_user</option>\n";
-		echo "</select><br /><input type='submit' value='Remove user' />\n</form>\n";
-	}
-	else
-	{
-		echo "<p>There is no user with specific rights.</p>\n";
-	}
-	echo "</div>\n";
-}
-
 //----------------------------------------------
 
-function showVirtualAlbum($valbum_id, $album, $album_media_dir, $album_thumbnails_dir, $from_date, $to_date, $is_insight)
+function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $is_insight)
 {
+	$album_media_dir = MediaAccess\getAlbumDir($album);
 	echo "<div class='added_padding'>";
 	$date_media_files = array();
 	$i = 0;
@@ -337,7 +218,7 @@ function showVirtualAlbum($valbum_id, $album, $album_media_dir, $album_thumbnail
 		if (MediaInfos\isReallyAMediaFile($media_file))
 		{
 			$date_file = MediaInfos\getDateTaken($media_file);
-			if (strcmp($date_file, $from_date) >= 0 && strcmp($date_file, $to_date) <= 0)
+			if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
 			{
 				$date_media_files[$media_file] = $date_file;
 				$i += 1;
@@ -360,7 +241,7 @@ function showVirtualAlbum($valbum_id, $album, $album_media_dir, $album_thumbnail
 			echo "</div><div class='new_day'><h3>".preg_replace('/:/', '-', $day)."</h3>\n";
 			$day_mark = $day;
 		}
-		showMediaThumb($valbum_id, $album, basename($media_file), $album_thumbnails_dir, !$is_insight, !$is_insight);
+		showMediaThumb($valbum_id, $album, basename($media_file), !$is_insight, !$is_insight);
 		$i++;
 	}
 	
@@ -370,9 +251,9 @@ function showVirtualAlbum($valbum_id, $album, $album_media_dir, $album_thumbnail
 
 //----------------------------------------------
 
-function showMediaThumb($valbum_id, $album, $media_id, $album_thumbnails_dir, $add_link, $add_comment_insight)
+function showMediaThumb($valbum_id, $album, $media_id, $add_link, $add_comment_insight)
 {
-	if (!file_exists(getRealThumbFileFromMedia($album, $media_id)))
+	if (!file_exists(MediaAccess\getRealThumbFileFromMedia($album, $media_id)))
 	{
 		echo '<script type="text/javascript">media_ids_to_process.push("'.$media_id.'");</script>';
 	}
