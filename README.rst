@@ -18,5 +18,5 @@ Installation for noobs :
  * Upload your pictures and video organized as you wish into subdirectories of albums/ , for example with an FTP client. You can remove the directory *example_album*.
  * Go with your browser to the index page, connect as user "admin".
  * Add visibility for the other users with "virtual albums and group titles".
- * Click on "disconnect or change", and now connect with another login to see what visibility you set up.
+ * Click on "disconnect or change user", and now connect with another login to see what visibility you set up.
  * Go in each album to load the thumbnails for each picture.
