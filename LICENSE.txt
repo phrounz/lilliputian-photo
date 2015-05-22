@@ -22,6 +22,6 @@ SOFTWARE.
 
 
 Note: 
-The "Thumbnail Image Class for Thumbnail Generator" code (see all/generate_thumbnail.php) is Copyright (c) zubrag.com 
-See http://www.zubrag.com/scripts/website-thumbnail-generator.php for information
-(very ambiguous, but I assume it's ok to use for any purpose).
+The "Thumbnail Image Class for Thumbnail Generator" code (see all/generate_thumbnail.php) 
+is Copyright (c) zubrag.com. See http://www.zubrag.com/scripts/website-thumbnail-generator.php 
+for information (very ambiguous, but I assume it's ok to use for any purpose).
