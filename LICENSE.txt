@@ -19,3 +19,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+Note: 
+The "Thumbnail Image Class for Thumbnail Generator" code (see all/generate_thumbnail.php) is Copyright (c) zubrag.com 
+See http://www.zubrag.com/scripts/website-thumbnail-generator.php for information
+(very ambiguous, but I assume it's ok to use for any purpose).
