@@ -298,8 +298,7 @@ function showMediaThumb($valbum_id, $album, $media_id, $add_link, $add_comment_i
 	//if ($is_video)
 	//	echo "<video class='insight_video' controls src='".getMediaUrl($valbum_id, $media_id)."' width='".CONST_WIDTH_THUMBNAIL."px;' preload='metadata' controls>";
 	//else
-		echo "<img class='".($is_video?'vid':'pic')."' src='".getMediaUrlThumb($valbum_id, $media_id)."' alt='(img)' />";
-	echo "</img>";
+	echo "<img class='".($is_video?'vid':'pic')."' src='".getMediaUrlThumb($valbum_id, $media_id)."' alt='(img)' />";
 	echo "".($add_link?"</a>":"")."\n";
 }
 
