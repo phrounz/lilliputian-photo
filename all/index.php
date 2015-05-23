@@ -8,10 +8,12 @@
 	require_once("inc/admin_interface.inc.php");
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- Using https://github.com/phrounz/lilliputian-photo -->
 <html>
 <head>
 	<meta content="text/html;charset=iso-8859-1" http-equiv="Content-Type" />
 	<link href="style.css" rel="stylesheet" type="text/css" />
+	<title><?php echo CONST_MAIN_TITLE; ?></title>
 	<style type="text/css">
 
 		.pic {
@@ -52,6 +54,7 @@
 					<h2>
 	
 <?php
+	\VirtualAlbumsConf\createDefaultUserIfNotExists();
 	
 	// POST parameters
 	$new_comment = isset($_POST['new_comment']) ? strip_tags($_POST['new_comment']) : null;
@@ -110,10 +113,12 @@
 	// media page
 	if (isset($media_id))
 	{
-		if (isset($new_comment)) Comments\insertNewComment($album, $media_id, $new_comment);
-		if (isset($comment_to_delete)) Comments\deleteComment($album, $media_id, $comment_to_delete);
+		$valbum_user = $valbum_array[$valbum_id]['user'];
+		$comments_permissions = $valbum_array[$valbum_id]['comments_permissions'];
+		if (isset($new_comment)) Comments\insertNewComment($album, $media_id, $new_comment, $comments_permissions);
+		if (isset($comment_to_delete)) Comments\deleteComment($album, $media_id, $comment_to_delete, $comments_permissions, $valbum_user);
 		echo "<div class='media_page'>\n";
-		showMediaPage($valbum_id, $album, $media_id);
+		showMediaPage($valbum_id, $album, $media_id, $comments_permissions, $valbum_user);
 		echo "</div>\n";
 	}
 	//----------------------------
@@ -124,7 +129,8 @@
 	
 		if (isset($valbum_array[$valbum_id]))
 		{
-			showVirtualAlbum($valbum_id, $album, $valbum_array[$valbum_id]["from_date"], $valbum_array[$valbum_id]["to_date"], false);
+			$valbum = $valbum_array[$valbum_id];
+			showVirtualAlbum($valbum_id, $album, $valbum['from_date'], $valbum['to_date'], $valbum['comments_permissions'], false);
 			echo '<script type="text/javascript">if (media_ids_to_process.length > 0){generateThumbnailAjax(media_ids_to_process[0], "'.$valbum_id.'");}</script>'."\n";
 		}
 		else
@@ -145,6 +151,7 @@
 ?>
 
 <!-- ============================================================================== -->
+
 	</div>
 
 </body>
@@ -190,7 +197,7 @@ function showListOfAlbums($valbum_array)
 				."<span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"
 				."$album_title</span></h3><span>";// - ".count($media_files_this_album)." elements
 			
-			showVirtualAlbum($valbum_id, $valbum['album'], $valbum["from_date"], $valbum["to_date"], true);
+			showVirtualAlbum($valbum_id, $valbum['album'], $valbum['from_date'], $valbum['to_date'], $valbum['comments_permissions'], true);
 			echo "</span></a></td>\n";
 			$j++;
 			if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}
@@ -201,12 +208,20 @@ function showListOfAlbums($valbum_array)
 		}
 	}
 	echo "</tr></table>";
-	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER) echo "</div>\n";
+	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
+	{
+		echo "</div>\n";
+		foreach (VirtualAlbumsConf\getUsers(false) as $user)
+		{
+			if (VirtualAlbumsConf\isUserConfEmpty($user))
+				echo "<div class='admin_box'><h2>Stuff visible by: <i>".$user."</i></h2><p>Nothing is visible by this user.</p></div>";
+		}
+	}
 }
 
 //----------------------------------------------
 
-function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $is_insight)
+function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight)
 {
 	$album_media_dir = MediaAccess\getAlbumDir($album);
 	echo "<div class='added_padding'>";
@@ -241,7 +256,7 @@ function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $is_insight)
 			echo "</div><div class='new_day'><h3>".preg_replace('/:/', '-', $day)."</h3>\n";
 			$day_mark = $day;
 		}
-		showMediaThumb($valbum_id, $album, basename($media_file), !$is_insight, !$is_insight);
+		showMediaThumb($valbum_id, $album, basename($media_file), !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
 		$i++;
 	}
 	
@@ -294,7 +309,7 @@ function strReplies($nb) { return $nb>1 ? "$nb replies" : "$nb reply"; }
 
 //----------------------------------------------
 
-function showMediaPage($valbum_id, $album, $media_id)
+function showMediaPage($valbum_id, $album, $media_id, $valbum_comments_permissions, $valbum_user)
 {
 	$is_video = MediaInfos\isMediaFileAVideo($media_id);
 	$php_media_file = getMediaUrl($valbum_id, $media_id);
@@ -304,27 +319,35 @@ function showMediaPage($valbum_id, $album, $media_id)
 	
 	$all_commenting = '';
 	$php_this_media = getMediaPageUrl($valbum_id, $media_id);
-
-	$i = 0;
-	foreach (Comments\readComments($album, $media_id) as $comment)
-	{
-		$span_delete = '';
-		if ($_SERVER['REMOTE_USER'] == $comment['user'] || $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
-		{
-			$span_delete = "<form style='float: right;' action='$php_this_media' method='POST'>"
-				."<input type='hidden' name='comment_to_delete' value='$i' />"
-				."<input type='submit' value='Delete' />"
-				."</form>";
-		}
-		$all_commenting .= "\n<div class='comment_box'>".($comment['user']==''?'':'<b>'.$comment['user'].': </b>').$comment['comment']."$span_delete</div><br />\n";
-		$i += 1;
-	}
 	
-	$all_commenting .= ""
-		."<div class='comment_box'><form action='$php_this_media' method='POST'>"
-		.'<textarea rows="5" name="new_comment"></textarea>'
-		.'<br /><input type="submit" value="Submit comment" />'
-		.'</form></div>';
+	$valbum_user_mod = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
+
+	if (strpos($valbum_comments_permissions, 'R')!==FALSE)
+	{
+		$i = 0;
+		foreach (Comments\readComments($album, $media_id) as $comment)
+		{
+			$span_delete = '';
+			if (($valbum_comments_permissions == 'RWD' && $valbum_user_mod == $comment['user']) || $valbum_comments_permissions=='RWDA')
+			{
+				$span_delete = "<form style='float: right;' action='$php_this_media' method='POST'>"
+					."<input type='hidden' name='comment_to_delete' value='$i' />"
+					."<input type='submit' value='Delete' />"
+					."</form>";
+			}
+			$all_commenting .= "\n<div class='comment_box'>".($comment['user']==''?'':'<b>'.$comment['user'].': </b>').$comment['comment']."$span_delete</div><br />\n";
+			$i += 1;
+		}
+		
+		if (strpos($valbum_comments_permissions, 'RW')!==FALSE)
+		{
+			$all_commenting .= ""
+				."<div class='comment_box'><form action='$php_this_media' method='POST'>"
+				.'<textarea rows="5" name="new_comment"></textarea>'
+				.'<br /><input type="submit" value="Submit comment" />'
+				.'</form></div>';
+		}
+	}
 	
 	if ($is_video)
 	{

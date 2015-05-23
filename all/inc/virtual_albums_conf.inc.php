@@ -26,6 +26,7 @@ function listVirtualAlbums()
 					'album' => $alb,
 					'from_date' => null,
 					'to_date' => null,
+					'comments_permissions' => 'RWDA',
 					'user' => CONST_ADMIN_USER));
 		}
 		if (file_exists(CONST_ALBUM_CONF_DIR))
@@ -50,9 +51,9 @@ function listVirtualAlbums()
 
 //----------------------------------------------
 
-function createVirtualAlbum($title, $album, $from_date, $to_date, $user)
+function createVirtualAlbum($title, $album, $from_date, $to_date, $comments_permissions, $user)
 {
-	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date\n", FILE_APPEND) !== FALSE;
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date|$comments_permissions\n", FILE_APPEND) !== FALSE;
 }
 
 //----------------------------------------------
@@ -86,6 +87,13 @@ function getUsers($skip_default)
 		if (!($skip_default && basename($album_conf_file)==CONST_DEFAULT_USER))
 			array_push($users, basename($album_conf_file));
 	return $users;
+}
+
+//----------------------------------------------
+
+function isUserConfEmpty($user)
+{
+	return file_get_contents(CONST_ALBUM_CONF_DIR."/$user") == "";
 }
 
 //----------------------------------------------
@@ -141,12 +149,13 @@ function readVirtualAlbumConfFile($album_conf_file)
 				{
 					array_push($valbum_array, 
 						array( 
-							"type" => $data[0], 
-							"title" => $data[1], 
-							"album" => $data[2], 
-							"from_date" => $data[3], 
-							"to_date" => $data[4], 
-							"user" => $user
+							'type' => $data[0], 
+							'title' => $data[1], 
+							'album' => $data[2], 
+							'from_date' => $data[3], 
+							'to_date' => $data[4], 
+							'comments_permissions' => $data[5],
+							'user' => $user
 							));
 				}
 				else if ($data[0] == 'GROUP_TITLE') // add a title for a group of virtual albums
@@ -157,7 +166,7 @@ function readVirtualAlbumConfFile($album_conf_file)
 				{
 					foreach (readVirtualAlbumConfFile($data[1]) as $valbum) array_push($valbum_array, $valbum);
 				}
-				else if ($data[0] == 'REMOVE') // remove an album previously mentioned with 'ALBUM'
+				else if ($data[0] == 'REMOVE') // remove a virtual album or a group title previously mentioned with 'ALBUM'
 				{
 					$global_data1_for_filter = $data[1];
 					$valbum_array = array_filter($valbum_array, function ($a){ global $global_data1_for_filter;return $a['title'] != $global_data1_for_filter; });

@@ -12,21 +12,28 @@ function readComments($album, $media_id)
 	return readCommentsFile_(getCommentFileFromMedia_($album, $media_id));
 }
 
-function insertNewComment($album, $media_id, $new_comment)
+function insertNewComment($album, $media_id, $new_comment, $valbum_comments_permissions)
 {
 	$new_comment = str_replace("\r", '<br />', str_replace("\n", '<br />', str_replace("|", '&#124;', $new_comment)));
 	
-	if (!file_exists(CONST_COMMENTS_DIR)) mkdir(CONST_COMMENTS_DIR);
-	if (!file_exists(CONST_COMMENTS_DIR."/$album")) mkdir(CONST_COMMENTS_DIR."/$album");
-	
-	$comments_file = getCommentFileFromMedia_($album, $media_id);
-	$connected_user = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
-	file_put_contents($comments_file, (file_exists($comments_file) ? '|':'')."$connected_user=$new_comment", FILE_APPEND);
+	if (strpos($valbum_comments_permissions, 'RW')!==FALSE)
+	{
+		if (!file_exists(CONST_COMMENTS_DIR)) mkdir(CONST_COMMENTS_DIR);
+		if (!file_exists(CONST_COMMENTS_DIR."/$album")) mkdir(CONST_COMMENTS_DIR."/$album");
+		
+		$comments_file = getCommentFileFromMedia_($album, $media_id);
+		$connected_user = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
+		file_put_contents($comments_file, (file_exists($comments_file) ? '|':'')."$connected_user=$new_comment", FILE_APPEND);
+	}
+	else
+	{
+		die("You are not allowed to do that.");
+	}
 }
 
-function deleteComment($album, $media_id, $comment_to_delete)
+function deleteComment($album, $media_id, $comment_to_delete, $valbum_comments_permissions, $valbum_user)
 {
-	deleteComment_($album, $media_id, $comment_to_delete);
+	deleteComment_($album, $media_id, $comment_to_delete, $valbum_comments_permissions, $valbum_user);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,16 +70,14 @@ function readCommentsFile_($comments_file)
 
 //----------------------------------------------
 
-function deleteComment_($album, $media_id, $comment_to_delete)
+function deleteComment_($album, $media_id, $comment_to_delete, $valbum_comments_permissions, $valbum_user)
 {
 	$comments_file = getCommentFileFromMedia_($album, $media_id);
 	$comments_array = readCommentsFile_($comments_file);
 	$comment_to_delete_desc = $comments_array[$comment_to_delete];
-	if ($comment_to_delete_desc['user'] != $_SERVER['REMOTE_USER'] && $_SERVER['REMOTE_USER'] != CONST_ADMIN_USER)
-	{
-		die('You are not allowed to do that. You are "'.$_SERVER['REMOTE_USER'].'" and this is a comment of "'.$comment_to_delete_desc['user'].'".');
-	}
-	else
+	$valbum_user_mod = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
+	
+	if (($valbum_comments_permissions == 'RWD' && $valbum_user_mod == $comment_to_delete_desc['user']) || $valbum_comments_permissions == 'RWDA')
 	{
 		$i = 0;
 		$comments_agr=array();
@@ -97,6 +102,10 @@ function deleteComment_($album, $media_id, $comment_to_delete)
 		}
 		else
 			file_put_contents($comments_file, implode('|', $comments_agr));
+	}
+	else
+	{
+		die("You are not allowed to do that.");
 	}
 }
 

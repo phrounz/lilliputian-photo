@@ -43,7 +43,12 @@ function doPostOperations()
 	{
 		$str_pst = "Virtual album <i>".$_POST['valbum_add__title']."</i> creation for user <i>".$_POST['valbum_add__user']."</i>";
 		$res = \VirtualAlbumsConf\createVirtualAlbum(
-			$_POST['valbum_add__title'], $_POST['valbum_add__album'], $_POST['valbum_add__beginning'], $_POST['valbum_add__end'], $_POST['valbum_add__user']);
+			$_POST['valbum_add__title'], 
+			$_POST['valbum_add__album'], 
+			$_POST['valbum_add__beginning'], 
+			$_POST['valbum_add__end'], 
+			$_POST['valbum_add__comments_permissions'], 
+			$_POST['valbum_add__user']);
 	}
 	else if (isset($_POST['valbum_add__type']) && $_POST['valbum_add__type']=='GROUP_TITLE')
 	{
@@ -73,8 +78,6 @@ function doPostOperations()
 
 function showEdition($valbum_array)
 {
-	\VirtualAlbumsConf\createDefaultUserIfNotExists();
-	
 	//----------------------------
 	// Album management
 	echo "\n<div class='admin_box'>\n<h2>Album management</h2>\n"
@@ -108,6 +111,11 @@ function showEdition($valbum_array)
 		."<br />allowing visibility on the album ".getSelectAlbums('valbum_add__album')
 		."<br />starting from <input type='text' name='valbum_add__beginning' value='0' /><small> (0 means the beginning of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
 		."<br />until <input type='text' name='valbum_add__end' value='ZZZZZZZZZ' /><small> (ZZZZZZZZZ means the end of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
+		."<br />and about commenting: <input type='radio' name='valbum_add__comments_permissions' value='NONE'>no access</input> - "
+		."<input type='radio' name='valbum_add__comments_permissions' value='R'>read access</input> - "
+		."<input type='radio' name='valbum_add__comments_permissions' value='RW'>read/write</input> - "
+		."<input type='radio' name='valbum_add__comments_permissions' value='RWD' checked>read/write + delete own comments</input> - "
+		."<input type='radio' name='valbum_add__comments_permissions' value='RWDA'>read/write + delete all comments</input>"
 		."<br /><input type='submit' value='Add virtual album' />\n"
 		."</form></li><br />\n"
 
