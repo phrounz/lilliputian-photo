@@ -6,6 +6,8 @@
 	define('CONST_ALBUM_CONF_DIR', './albums_conf');
 	define('CONST_COMMENTS_DIR', './comments');
 	define('CONST_THUMBNAILS_DIR', './thumbnails');
+	define('CONST_CACHE_INDEX_DIR', './cache_index');
+	define('CONST_CACHE_ALBUM_DIR', './cache_album');
 	define('CONST_MAIN_TITLE', 'Photos &amp; videos');
 	
 	// album page (media thumbnails)

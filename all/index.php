@@ -6,6 +6,18 @@
 	require_once("inc/media_access.inc.php");
 	require_once("inc/comments.inc.php");
 	require_once("inc/admin_interface.inc.php");
+	require_once("inc/cache.inc.php");
+			
+	\VirtualAlbumsConf\createDefaultUserIfNotExists();
+	
+	// GET parameters
+	$valbum_id = isset($_GET['q']) ? $_GET['q'] : null;
+	$media_id = isset($_GET['img']) ? $_GET['img'] : null;
+	
+	// check and possibly use cache version
+	$generate_cache_file = Cache\checkAndUseCache($valbum_id, $media_id);
+	if (isset($generate_cache_file)) ob_start();
+	
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!-- Using https://github.com/phrounz/lilliputian-photo -->
@@ -54,8 +66,6 @@
 					<h2>
 	
 <?php
-	\VirtualAlbumsConf\createDefaultUserIfNotExists();
-	
 	// POST parameters
 	$new_comment = isset($_POST['new_comment']) ? strip_tags($_POST['new_comment']) : null;
 	$comment_to_delete = isset($_POST['comment_to_delete']) ? strip_tags($_POST['comment_to_delete']) : null;
@@ -67,11 +77,7 @@
 		list($str_op, $res) = AdminInterface\doPostOperations();
 		if ($str_op!='') $str_pst = "<div class='admin_box'>\n<font color='".($res?'blue':'red')."'>\n$str_op ".($res?'succeeded.':'failed.')."</font>\n</div>\n";
 	}
-	
-	// GET parameters
-	$valbum_id = isset($_GET['q']) ? $_GET['q'] : null;
-	$media_id = isset($_GET['img']) ? $_GET['img'] : null;
-	
+
 	// load list of virtual albums for this user
 	$valbum_array = VirtualAlbumsConf\listVirtualAlbums();
 	
@@ -108,6 +114,8 @@
 	//----------------------------
 	//get album from valbum_id
 	$album = isset($valbum_id) && isset($valbum_array[$valbum_id]) ? $valbum_array[$valbum_id]["album"] : null;
+	
+	$nb_elements = null;
 
 	//----------------------------
 	// media page
@@ -130,7 +138,7 @@
 		if (isset($valbum_array[$valbum_id]))
 		{
 			$valbum = $valbum_array[$valbum_id];
-			showVirtualAlbum($valbum_id, $album, $valbum['from_date'], $valbum['to_date'], $valbum['comments_permissions'], false);
+			$nb_elements = showVirtualAlbum($valbum_id, $album, $valbum['from_date'], $valbum['to_date'], $valbum['comments_permissions'], false);
 			echo '<script type="text/javascript">if (media_ids_to_process.length > 0){generateThumbnailAjax(media_ids_to_process[0], "'.$valbum_id.'");}</script>'."\n";
 		}
 		else
@@ -149,6 +157,12 @@
 		}
 	}
 ?>
+		<div class='group'>
+			<?php 
+				if (isset($nb_elements)) echo "$nb_elements elements - ";
+				echo (isset($generate_cache_file)?"Cache generated at: ".date('l jS \of F Y h:i:s A')."\n":"Cache not generated");
+			?>
+		</div>
 
 <!-- ============================================================================== -->
 
@@ -158,9 +172,21 @@
 </html>
 
 <?php
+	if (isset($generate_cache_file))
+	{
+		$page = ob_get_contents();
+		ob_end_clean();
+		if (!file_exists(dirname(dirname($generate_cache_file)))) mkdir(dirname(dirname($generate_cache_file)));
+		if (!file_exists(dirname($generate_cache_file))) mkdir(dirname($generate_cache_file));
+		file_put_contents($generate_cache_file, $page);
+		echo $page;
+	}
+
 //--------------------------------------------------------------------------
 // functions
 //--------------------------------------------------------------------------
+
+//----------------------------------------------
 
 function showListOfAlbums($valbum_array)
 {
@@ -261,7 +287,7 @@ function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $comments_pe
 	}
 	
 	echo "</div>";
-	if (!$is_insight) echo "<p>($i elements)</p>";
+	return $i;
 }
 
 //----------------------------------------------
