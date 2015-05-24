@@ -13,7 +13,7 @@
 	// GET parameters
 	$valbum_id = isset($_GET['q']) ? $_GET['q'] : null;
 	$media_id = isset($_GET['img']) ? $_GET['img'] : null;
-	
+
 	// double-check password
 	if (CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD != '')
 	{
@@ -31,9 +31,13 @@
 	}
 	
 	// check and possibly use cache version
-	$generate_cache_file = Cache\checkAndUseCache($valbum_id, $media_id);
-	if (isset($generate_cache_file)) ob_start();
-	
+	$generate_cache_file = null;
+	if (CONST_USE_CACHE)
+	{
+		$generate_cache_file = Cache\checkAndUseCache($valbum_id, $media_id);
+		$cancel_cache_generation = false;
+		if (isset($generate_cache_file)) ob_start();
+	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!-- Using https://github.com/phrounz/lilliputian-photo -->
@@ -176,7 +180,9 @@
 		<div class='group'>
 			<?php 
 				if (isset($nb_elements)) echo "$nb_elements elements - ";
-				echo (isset($generate_cache_file)?"Cache generated at: ".date('l jS \of F Y h:i:s A')."\n":"Cache not generated");
+				echo (isset($generate_cache_file) && !$cancel_cache_generation?
+					"Cache generated at: ".date('l jS \of F Y h:i:s A')."\n" : 
+					"Cache not generated (".(isset($generate_cache_file)?'1':'0')."-".($cancel_cache_generation?'1':'0').")");
 			?>
 		</div>
 
@@ -188,16 +194,8 @@
 </html>
 
 <?php
-	if (isset($generate_cache_file))
-	{
-		$page = ob_get_contents();
-		ob_end_clean();
-		if (!file_exists(dirname(dirname($generate_cache_file)))) mkdir(dirname(dirname($generate_cache_file)));
-		if (!file_exists(dirname($generate_cache_file))) mkdir(dirname($generate_cache_file));
-		file_put_contents($generate_cache_file, $page);
-		echo $page;
-	}
-
+	Cache\finishCache($generate_cache_file, $cancel_cache_generation);
+	
 //--------------------------------------------------------------------------
 // functions
 //--------------------------------------------------------------------------
@@ -310,9 +308,11 @@ function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $comments_pe
 
 function showMediaThumb($valbum_id, $album, $media_id, $add_link, $add_comment_insight)
 {
+	global $cancel_cache_generation;
 	if (!file_exists(MediaAccess\getRealThumbFileFromMedia($album, $media_id)))
 	{
 		echo '<script type="text/javascript">media_ids_to_process.push("'.$media_id.'");</script>';
+		$cancel_cache_generation = true;
 	}
 	$comments_insight = "";
 	$is_video = MediaInfos\isMediaFileAVideo($media_id);

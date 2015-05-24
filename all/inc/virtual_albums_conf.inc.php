@@ -98,13 +98,6 @@ function isUserConfEmpty($user)
 
 //----------------------------------------------
 
-function getMTimeUserConf($user)
-{
-	return file_exists(CONST_ALBUM_CONF_DIR."/$user") ? filemtime(CONST_ALBUM_CONF_DIR."/$user") : filemtime(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER);
-}
-
-//----------------------------------------------
-
 function removeUser($user)
 {
 	return unlink(CONST_ALBUM_CONF_DIR."/$user");

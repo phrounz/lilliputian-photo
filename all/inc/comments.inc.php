@@ -2,6 +2,7 @@
 	namespace Comments;
 	error_reporting(E_ALL);
 	require_once("conf.inc.php");
+	require_once("cache.inc.php");
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // public functions
@@ -24,6 +25,8 @@ function insertNewComment($album, $media_id, $new_comment, $valbum_comments_perm
 		$comments_file = getCommentFileFromMedia_($album, $media_id);
 		$connected_user = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
 		file_put_contents($comments_file, (file_exists($comments_file) ? '|':'')."$connected_user=$new_comment", FILE_APPEND);
+		
+		\Cache\clearAllCache();// TODO remove only concerned caches
 	}
 	else
 	{
@@ -34,6 +37,7 @@ function insertNewComment($album, $media_id, $new_comment, $valbum_comments_perm
 function deleteComment($album, $media_id, $comment_to_delete, $valbum_comments_permissions, $valbum_user)
 {
 	deleteComment_($album, $media_id, $comment_to_delete, $valbum_comments_permissions, $valbum_user);
+	\Cache\clearAllCache();// TODO remove only concerned caches
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------

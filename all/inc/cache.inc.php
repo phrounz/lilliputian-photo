@@ -16,25 +16,66 @@ function checkAndUseCache($valbum_id, $media_id)
 		// no cache yet for media page
 		return null;
 	}
-	else if (isset($valbum_id))
-	{
-		$cache_file = CONST_CACHE_ALBUM_DIR."/".$_SERVER['REMOTE_USER']."/".$valbum_id;
-		if (checkCacheIsOk_($cache_file, true))
-		{
-			readfile($cache_file);
-			exit(0);
-		}
-		return count($_POST) == 0 ? $cache_file : null;
-	}
 	else
 	{
-		$cache_file = CONST_CACHE_INDEX_DIR."/".$_SERVER['REMOTE_USER'];
-		if (checkCacheIsOk_($cache_file, false))
+		$cache_file = isset($valbum_id) ? 
+			CONST_CACHE_ALBUM_DIR."/".$_SERVER['REMOTE_USER']."/".$valbum_id : 
+			CONST_CACHE_INDEX_DIR."/".$_SERVER['REMOTE_USER'];
+		
+		if (count($_POST) > 0)
 		{
-			readfile($cache_file);
-			exit(0);
+			if (file_exists($cache_file)) unlink($cache_file);
+			return null;
 		}
-		return count($_POST) == 0 ? $cache_file : null;
+		else
+		{
+			if (file_exists($cache_file))
+			{
+				if (checkCacheIsOk_($cache_file, $valbum_id))
+				{
+					readfile($cache_file);
+					exit(0);
+				}
+			}
+			return $cache_file;
+		}
+	}
+}
+
+//----------------------------------------------
+
+function clearAllCache()
+{
+	foreach (glob(CONST_CACHE_INDEX_DIR."/*") as $cache_file) unlink($cache_file);
+	if (count(glob(CONST_CACHE_INDEX_DIR."/*"))==0) rmdir(CONST_CACHE_INDEX_DIR);
+	
+	foreach (glob(CONST_CACHE_ALBUM_DIR."/*/*") as $cache_file) unlink($cache_file);
+	foreach (glob(CONST_CACHE_ALBUM_DIR."/*") as $cache_dir)
+	{
+		if (count(glob($cache_dir."/*"))==0) rmdir($cache_dir);
+	}
+	if (count(glob(CONST_CACHE_ALBUM_DIR."/*"))==0) rmdir(CONST_CACHE_ALBUM_DIR);
+}
+
+//----------------------------------------------
+
+function finishCache($generate_cache_file, $cancel_cache_generation)
+{
+	if (isset($generate_cache_file))
+	{
+		$page = ob_get_contents();
+		ob_end_clean();
+		if ($cancel_cache_generation)
+		{
+			if (file_exists($generate_cache_file)) unlink($generate_cache_file);
+		}
+		else
+		{
+			if (!file_exists(dirname(dirname($generate_cache_file)))) mkdir(dirname(dirname($generate_cache_file)));
+			if (!file_exists(dirname($generate_cache_file))) mkdir(dirname($generate_cache_file));
+			file_put_contents($generate_cache_file, $page);
+		}
+		echo $page;
 	}
 }
 
@@ -42,33 +83,19 @@ function checkAndUseCache($valbum_id, $media_id)
 // private function
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-function checkCacheIsOk_($cache_file, $check_also_comments_and_thumbs)
+function checkCacheIsOk_($cache_file , $valbum_id)
 {
-	if (file_exists($cache_file))
+	$mtime_cache_file = filemtime($cache_file);
+	foreach (array_merge(glob("inc/*"),glob("*.php"),glob(CONST_ALBUM_CONF_DIR."/*")) as $file_or_dir) //\MediaAccess\getAllAlbumsDirs(),
 	{
-		if (count($_POST) > 0)
-		{
-			unlink($cache_file);
+		if (filemtime($file_or_dir) > $mtime_cache_file) return false;
+	}
+	if (isset($valbum_id))
+	{
+		if (file_exists(CONST_COMMENTS_DIR) && file_exists(CONST_COMMENTS_DIR."/$valbum_id") && filemtime(CONST_COMMENTS_DIR."/$valbum_id") > $mtime_cache_file)
 			return false;
-		}
-		$mtime_cache_file = filemtime($cache_file);
-		foreach (array_merge(\MediaAccess\getAllAlbumsDirs(),glob("inc/*"),glob("*.php"),glob(CONST_ALBUM_CONF_DIR."/*")) as $file_or_dir)
-		{
-			if (filemtime($file_or_dir) > $mtime_cache_file) return false;
-		}
-		if ($check_also_comments_and_thumbs)
-		{
-			foreach (array_merge(glob(CONST_COMMENTS_DIR."/*"),glob(CONST_THUMBNAILS_DIR."/*")) as $comments_dir)
-			{
-				if (filemtime($file_or_dir) > $mtime_cache_file) return false;
-			}
-		}
-		if (\VirtualAlbumsConf\getMTimeUserConf($_SERVER['REMOTE_USER']) >$mtime_cache_file) return false;
 	}
-	else
-	{
-		return false;
-	}
+	
 	return true;
 }
 

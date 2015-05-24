@@ -4,6 +4,7 @@
 	require_once("conf.inc.php");
 	require_once("virtual_albums_conf.inc.php");
 	require_once("media_access.inc.php");
+	require_once("cache.inc.php");
 	
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // public function
@@ -13,10 +14,15 @@ function doPostOperations()
 {
 	$str_pst = '';
 	$res = false;
-	
+
+	// cache regeneration
+	if (isset($_POST['regenerate']))
+	{
+		\Cache\clearAllCache();
+	}
 	//------------
 	// albums
-	if (isset($_POST['album_create']) && strip_tags($_POST['album_create'])!='')
+	else if (isset($_POST['album_create']) && strip_tags($_POST['album_create'])!='')
 	{
 		$str_pst = 'Album creation';
 		$res = mkdir(\MediaAccess\getAlbumDir($_POST['album_create']));
@@ -99,6 +105,14 @@ function showEdition($valbum_array)
 		
 	echo "</ul></div>\n";
 	
+	//----------------------------
+	// Cache regeneration
+	echo "\n<div class='admin_box'>\n<h2>Force cache regeneration</h2>\n"
+		."<p>You should call this after modifying albums "
+		."<form action='".getTargetPage()."' method='POST'>"
+		."<input type='submit' value='Force regeneration of all cache files' />"
+		."<input type='hidden' name='regenerate' value='true' /><form></div>";
+
 	//----------------------------
 	// Virtual albums and group titles
 	echo "\n<div class='admin_box'>\n<h2>Virtual albums and group titles</h2>\n"
