@@ -14,6 +14,22 @@
 	$valbum_id = isset($_GET['q']) ? $_GET['q'] : null;
 	$media_id = isset($_GET['img']) ? $_GET['img'] : null;
 	
+	// double-check password
+	if (CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD != '')
+	{
+		$is_ok = false;
+		if (file_exists(CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD) && (isset($_SERVER['HTTP_AUTHORIZATION']) || isset($_SERVER['PHP_AUTH_USER'])))
+		{
+			list($user_auth, $pass_auth) = isset($_SERVER['PHP_AUTH_USER']) ? array($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) : 
+				explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+			foreach (file(CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD) as $line)
+			{
+				if (rtrim($line) == "$user_auth:$pass_auth" || rtrim($line) == "$user_auth:".crypt($pass_auth)) {$is_ok = true;break;}
+			}
+		}
+		if (!$is_ok) die();
+	}
+	
 	// check and possibly use cache version
 	$generate_cache_file = Cache\checkAndUseCache($valbum_id, $media_id);
 	if (isset($generate_cache_file)) ob_start();

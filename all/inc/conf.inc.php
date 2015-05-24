@@ -9,6 +9,8 @@
 	define('CONST_CACHE_INDEX_DIR', './cache_index');
 	define('CONST_CACHE_ALBUM_DIR', './cache_album');
 	define('CONST_MAIN_TITLE', 'Photos &amp; videos');
+	// additional security measure but disabled by default because does not work most of the time, depending of your apache configuration:
+	define('CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD', '');
 	
 	// album page (media thumbnails)
 	define('CONST_WIDTH_THUMBNAIL', 200);
