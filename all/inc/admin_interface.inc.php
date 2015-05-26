@@ -14,6 +14,7 @@ function doPostOperations()
 {
 	$str_pst = '';
 	$res = false;
+	//echo "<pre>";print_r($_POST);echo "</pre>";
 
 	// cache regeneration
 	if (isset($_POST['regenerate']))
@@ -107,12 +108,15 @@ function showEdition($valbum_array)
 	
 	//----------------------------
 	// Cache regeneration
-	echo "\n<div class='admin_box'>\n<h2>Force cache regeneration</h2>\n"
-		."<p>You should call this after modifying albums "
-		."<form action='".getTargetPage()."' method='POST'>"
-		."<input type='submit' value='Force regeneration of all cache files' />"
-		."<input type='hidden' name='regenerate' value='true' /><form></div>";
-
+	if (CONST_USE_CACHE)
+	{
+		echo "\n<div class='admin_box'>\n<h2>Force cache regeneration</h2>\n"
+			."<p>You should call this after modifying albums."
+			."<form action='".getTargetPage()."' method='POST'>"
+			."<input type='submit' value='Force regeneration of all cache files' />"
+			."<input type='hidden' name='regenerate' value='true' /></form></div>";
+	}
+	
 	//----------------------------
 	// Virtual albums and group titles
 	echo "\n<div class='admin_box'>\n<h2>Virtual albums and group titles</h2>\n"

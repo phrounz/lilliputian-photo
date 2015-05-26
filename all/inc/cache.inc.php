@@ -46,15 +46,21 @@ function checkAndUseCache($valbum_id, $media_id)
 
 function clearAllCache()
 {
-	foreach (glob(CONST_CACHE_INDEX_DIR."/*") as $cache_file) unlink($cache_file);
-	if (count(glob(CONST_CACHE_INDEX_DIR."/*"))==0) rmdir(CONST_CACHE_INDEX_DIR);
-	
-	foreach (glob(CONST_CACHE_ALBUM_DIR."/*/*") as $cache_file) unlink($cache_file);
-	foreach (glob(CONST_CACHE_ALBUM_DIR."/*") as $cache_dir)
+	if (file_exists(CONST_CACHE_INDEX_DIR))
 	{
-		if (count(glob($cache_dir."/*"))==0) rmdir($cache_dir);
+		foreach (glob(CONST_CACHE_INDEX_DIR."/*") as $cache_file) unlink($cache_file);
+		if (count(glob(CONST_CACHE_INDEX_DIR."/*"))==0) rmdir(CONST_CACHE_INDEX_DIR);
 	}
-	if (count(glob(CONST_CACHE_ALBUM_DIR."/*"))==0) rmdir(CONST_CACHE_ALBUM_DIR);
+	
+	if (file_exists(CONST_CACHE_ALBUM_DIR))
+	{
+		foreach (glob(CONST_CACHE_ALBUM_DIR."/*/*") as $cache_file) unlink($cache_file);
+		foreach (glob(CONST_CACHE_ALBUM_DIR."/*") as $cache_dir)
+		{
+			if (count(glob($cache_dir."/*"))==0) rmdir($cache_dir);
+		}
+		if (count(glob(CONST_CACHE_ALBUM_DIR."/*"))==0) rmdir(CONST_CACHE_ALBUM_DIR);
+	}
 }
 
 //----------------------------------------------
