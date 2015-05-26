@@ -21,6 +21,6 @@
 	// album list page
 	define('CONST_WIDTH_ALBUM_INSIGHT', 100);
 	define('CONST_HEIGHT_ALBUM_INSIGHT', 75);
-	define('CONST_NB_INSIGHT_PICTURES', 8);
+	define('CONST_NB_INSIGHT_PICTURES', 6);
 	define('CONST_NB_COLUMNS_LIST_ALBUMS', 2);
 ?>
