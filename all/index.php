@@ -67,9 +67,11 @@
 		
 		<?php
 			if (isset($_GET['rot']))
-				echo 'video{-moz-transform:rotate(90deg);-webkit-transform:rotate(90deg);-o-transform:rotate(90deg);-ms-transform:rotate(90deg);transform:rotate(90deg);}';
+				echo '#the_media {-moz-transform:rotate(90deg);-webkit-transform:rotate(90deg);-o-transform:rotate(90deg);-ms-transform:rotate(90deg);transform:rotate(90deg);}';
 			else if (isset($_GET['anti_rot']))
-				echo 'video{-moz-transform:rotate(-90deg);-webkit-transform:rotate(-90deg);-o-transform:rotate(-90deg);-ms-transform:rotate(-90deg);transform:rotate(-90deg);}';
+				echo '#the_media {-moz-transform:rotate(-90deg);-webkit-transform:rotate(-90deg);-o-transform:rotate(-90deg);-ms-transform:rotate(-90deg);transform:rotate(-90deg);}';
+			else if (isset($_GET['inverse_rot']))
+				echo '#the_media {-moz-transform:rotate(180deg);-webkit-transform:rotate(180deg);-o-transform:rotate(180deg);-ms-transform:rotate(180deg);transform:rotate(180deg);}';
 		?>
 		
 	</style>
@@ -355,8 +357,8 @@ function showMediaPage($valbum_id, $album, $media_id, $valbum_comments_permissio
 	$is_video = MediaInfos\isMediaFileAVideo($media_id);
 	$php_media_file = getMediaUrl($valbum_id, $media_id);
 	$media_html = $is_video ?
-		"<video src='$php_media_file' controls width='100%' />" :
-		"<a href='$php_media_file'><img src='$php_media_file' alt='' style='height: 750px;'/></a>";
+		"<video id='the_media' src='$php_media_file' controls width='100%' />" :
+		"<a href='$php_media_file'><img id='the_media' src='$php_media_file' alt='' style='height: 750px;'/></a>";
 	
 	$all_commenting = '';
 	$php_this_media = getMediaPageUrl($valbum_id, $media_id);
@@ -390,11 +392,11 @@ function showMediaPage($valbum_id, $album, $media_id, $valbum_comments_permissio
 		}
 	}
 	
-	if ($is_video)
-	{
-		$all_commenting .= "<br /><br />Video orientation: <a href='$php_this_media&amp;rot'>90&deg;</a> / "
-			."<a href='$php_this_media'>normal</a> / <a href='$php_this_media&amp;anti_rot'>-90&deg;</a>.";
-	}
+	$all_commenting .= "<br /><br />Orientation: "
+		."<a href='$php_this_media&amp;anti_rot'>-90&deg;</a> / "
+		."<a href='$php_this_media'>normal</a> / "
+		."<a href='$php_this_media&amp;rot'>90&deg;</a> / "
+		."<a href='$php_this_media&amp;inverse_rot'>180&deg;</a>";
 	
 	echo "\n<table width='100%'><tr><td style='width: 60%;'>".$media_html."</td><td class='media_file_page_right'>".$all_commenting."</td></tr></table>\n";
 }
