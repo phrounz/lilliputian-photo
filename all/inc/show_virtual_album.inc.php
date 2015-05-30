@@ -10,8 +10,15 @@
 // public functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-function getListOfDays($album, $from_date, $to_date)
+//----------------------------------------------
+// get an associative array giving the number of elements per day of the album $album
+
+function getListOfDays($valbum)
 {
+	$album = $valbum['album'];
+	$from_date = $valbum['from_date'];
+	$to_date = $valbum['to_date'];
+	
 	$days_album = array();
 	foreach (glob(\MediaAccess\getAlbumDir($album)."/*") as $media_file)
 	{
@@ -32,6 +39,21 @@ function getListOfDays($album, $from_date, $to_date)
 	}
 	ksort($days_album);
 	return $days_album;
+}
+
+//----------------------------------------------
+// get the next media id following $media_id in the virtual album $valbum
+
+function getNextMedia($valbum, $media_id)
+{
+	$next_one = false;
+	$is_cut = false;
+	foreach (getListOfDatePerMedias($valbum['album'], $valbum['from_date'], $valbum['to_date'], false, $is_cut) as $media_file => $date)
+	{
+		if ($media_file == \MediaAccess\getRealMediaFile($valbum['album'], $media_id)) $next_one = true;
+		else if ($next_one) return basename($media_file);
+	}
+	return null;
 }
 
 //----------------------------------------------
@@ -68,9 +90,26 @@ function getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, &$is_
 
 //----------------------------------------------
 
-function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight)
+function show($valbum_id, $valbum, $day, $is_insight)
 {
-	global $cancel_cache_generation;
+	$from_date = isset($valbum['from_date']) ? $valbum['from_date'] : '';
+	$to_date = isset($valbum['to_date']) ? $valbum['to_date'] : 'ZZZZZZZZZZZZZZZZZZZ';
+	
+	showVirtualAlbum_(
+		$valbum_id, 
+		$valbum['album'], 
+		isset($day) && strcmp($day, $from_date) > 0 ? $day : $from_date, 
+		isset($day) && strcmp($day."ZZZZZZZZZZ", $to_date) < 0 ? $day."ZZZZZZZZZZ" : $to_date, 
+		$valbum['comments_permissions'], 
+		$is_insight);
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------
+// private functions
+//----------------------------------------------------------------------------------------------------------------------------------------------
+
+function showVirtualAlbum_($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight)
+{
 	$is_cut = false;
 	$date_media_files = getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, $is_cut);
 	$day_mark = null;
@@ -82,26 +121,15 @@ function showVirtualAlbum($valbum_id, $album, $from_date, $to_date, $comments_pe
 		$day = substr($date_file, 0, 10);
 		$media_id = basename($media_file);
 		showMediaThumb_($valbum_id, $album, $media_id, !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
-		
-		if (!file_exists(\MediaAccess\getRealThumbFileFromMedia($album, $media_id)) || !file_exists(\MediaAccess\getRealReducedFileFromMedia($album, $media_id)))
-		{
-			echo '<script type="text/javascript">media_ids_to_process.push("'.$media_id.'");</script>';
-			$cancel_cache_generation = true;
-		}
-
 		$i++;
 	}
-	if ($is_cut)
+	if ($is_insight)
 	{
 		echo "<img src='three_dots.png' alt='...' class='three_dots' />";
 	}
 	
 	return $i;
 }
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
-// private functions
-//----------------------------------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------
 
@@ -129,11 +157,11 @@ function showMediaThumb_($valbum_id, $album, $media_id, $add_link, $add_comment_
 	}
 	if ($comments_insight != '') $comments_insight = "<span class='comments_insight'>$comments_insight</span>";
 	
-	echo ($add_link ? "<a class='media_thumb_link' href='".getMediaPageUrl($valbum_id, $media_id)."'>" : "")."$comments_insight";
+	echo ($add_link ? "<a class='media_thumb_link' href='".\MediaAccess\getMediaPageUrl($valbum_id, $media_id)."'>" : "")."$comments_insight";
 	//if ($is_video)
-	//	echo "<video class='insight_video' controls src='".getMediaUrl($valbum_id, $media_id)."' width='".CONST_WIDTH_THUMBNAIL."px;' preload='metadata' controls>";
+	//	echo "<video class='insight_video' controls src='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."' width='".CONST_WIDTH_THUMBNAIL."px;' preload='metadata' controls>";
 	//else
-	echo "<img class='".($is_video?'vid':'pic')."' src='".getMediaUrlThumb($valbum_id, $media_id)."' alt='(img)' />";
+	echo "<img class='".($is_video?'vid':'pic')."' src='".\MediaAccess\getMediaUrlThumb($valbum_id, $media_id)."' alt='(img)' />";
 	echo "".($add_link?"</a>":"")."\n";
 }
 

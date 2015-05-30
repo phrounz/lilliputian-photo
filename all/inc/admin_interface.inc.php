@@ -4,7 +4,7 @@
 	require_once("conf.inc.php");
 	require_once("virtual_albums_conf.inc.php");
 	require_once("media_access.inc.php");
-	require_once("cache.inc.php");
+	require_once("inc/show_albums_list.inc.php");
 	
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // public function
@@ -16,11 +16,13 @@ function doPostOperations()
 	$res = false;
 	//echo "<pre>";print_r($_POST);echo "</pre>";
 
-	// cache regeneration
-	if (isset($_POST['regenerate']))
+	if (isset($_POST['generate_thumbs']))
 	{
-		\Cache\clearAllCache();
+		// load list of virtual albums for this user
+		$valbum_array = \VirtualAlbumsConf\listVirtualAlbums();
+		generateAllThumbsAndReducedPictures_($valbum_array);
 	}
+	
 	//------------
 	// albums
 	else if (isset($_POST['album_create']) && strip_tags($_POST['album_create'])!='')
@@ -107,15 +109,13 @@ function showEdition($valbum_array)
 	echo "</ul></div>\n";
 	
 	//----------------------------
-	// Cache regeneration
-	if (CONST_USE_CACHE)
-	{
-		echo "\n<div class='admin_box'>\n<h2>Force cache regeneration</h2>\n"
-			."<p>You should call this after modifying albums."
-			."<form action='".getTargetPage()."' method='POST'>"
-			."<input type='submit' value='Force regeneration of all cache files' />"
-			."<input type='hidden' name='regenerate' value='true' /></form></div>";
-	}
+	// Thumbnail and reduced pictures generation
+	
+	echo "\n<div class='admin_box'>\n<h2>Generate thumbnails and reduced pictures</h2>\n"
+		."<p>You should call this after modifying albums."
+		."<form action='".getTargetPage()."' method='POST'>"
+		."<input type='submit' value='Generate missing thumbnails and reduced pictures files' />"
+		."<input type='hidden' name='generate_thumbs' value='true' /></form></div>";
 	
 	//----------------------------
 	// Virtual albums and group titles
@@ -183,6 +183,35 @@ function showEdition($valbum_array)
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
+
+function generateAllThumbsAndReducedPictures_($valbum_array)
+{
+	echo "\n"
+		.'<script type="text/javascript" src="ajax.js"></script>'."\n"
+		.'<script type="text/javascript">'."\n";
+		
+	foreach ($valbum_array as $valbum_id => $valbum)
+	{
+		if (isset($valbum) && $valbum['type'] == 'ALBUM')
+		{
+			$album = $valbum['album'];
+			$is_cut = false;
+			foreach (\ShowVirtualAlbum\getListOfDatePerMedias($album, $valbum["from_date"], $valbum["to_date"], false, $is_cut) as $media_file => $date)
+			{
+				$media_id = basename($media_file);
+						
+				if (!file_exists(\MediaAccess\getRealThumbFileFromMedia($album, $media_id)) || !file_exists(\MediaAccess\getRealReducedFileFromMedia($album, $media_id)))
+				{
+					echo 'media_ids.push("'.$media_id.'");valbum_ids.push("'.$valbum_id.'");'."\n";
+				}
+			}
+		}
+	}
+	echo "\n"
+		.'if (media_ids.length > 0){generateThumbnailAjax(media_ids[0], valbum_ids[0]);}'."\n"
+		.'</script>'
+		."\n\n";
+}
 
 function getSelectAlbums($name)
 {

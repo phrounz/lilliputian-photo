@@ -1,10 +1,8 @@
 <?php
 	error_reporting(E_ALL);
 	require_once("inc/conf.inc.php");
-	require_once("inc/media_infos.inc.php");
 	require_once("inc/comments.inc.php");
 	require_once("inc/admin_interface.inc.php");
-	require_once("inc/cache.inc.php");	
 	require_once("inc/virtual_albums_conf.inc.php");
 	
 	require_once("inc/show_virtual_album.inc.php");
@@ -32,16 +30,6 @@
 			}
 		}
 		if (!$is_ok) die();
-	}
-	
-	// check and possibly use cache version
-	$generate_cache_file = null;
-	$cancel_cache_generation = false;
-	if (CONST_USE_CACHE)
-	{
-		$generate_cache_file = Cache\checkAndUseCache($valbum_id, $media_id);
-		$cancel_cache_generation = false;
-		if (isset($generate_cache_file)) ob_start();
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -86,7 +74,9 @@
 	</style>
 </head>
 <body>
-<h1>EN TRAVAUX, REVENIR DANS 2 HEURES, MERCI</h1>
+
+	<script type="text/javascript" src="ajax_get_day.js"></script>
+	
 	<div class='header'>
 		<table>
 			<tr>
@@ -109,11 +99,11 @@
 		if ($str_op!='') $str_pst = "<div class='admin_box'>\n<font color='".($res?'blue':'red')."'>\n$str_op ".($res?'succeeded.':'failed.')."</font>\n</div>\n";
 	}
 
-	// load list of virtual albums for this user
+	// load list of virtual albums visible by this user
 	$valbum_array = VirtualAlbumsConf\listVirtualAlbums();
 	
 	// display top page title
-	echo "\t\t\t\t\t\t<a href='".getListOfAlbumsUrl()."'>".CONST_MAIN_TITLE." </a>";
+	echo "\t\t\t\t\t\t<a href='".MediaAccess\getListOfAlbumsUrl()."'>".CONST_MAIN_TITLE." </a>";
 	if (isset($media_id) || isset($valbum_id))
 	{
 		if (!isset($valbum_id)) die("l.".__LINE__);
@@ -143,82 +133,51 @@
 	echo $str_pst;
 
 	//----------------------------
-	//get album from valbum_id
-	$album = isset($valbum_id) && isset($valbum_array[$valbum_id]) ? $valbum_array[$valbum_id]["album"] : null;
-	
-	$nb_elements = null;
-
-	//----------------------------
 	// media page
-	if (isset($media_id))
+	if (isset($valbum_id) && isset($media_id) && isset($valbum_array[$valbum_id]))
 	{
-		$valbum = $valbum_array[$valbum_id];
-			
-		$i = 0;
-		$next_one = null;
-		$is_cut = false;
-		$new_media_id = null;
-		foreach (\ShowVirtualAlbum\getListOfDatePerMedias($album, $valbum['from_date'], $valbum['to_date'], false, $is_cut) as $media_file => $date)
-		{
-			if ($media_file == \MediaAccess\getAlbumDir($album)."/".$media_id)
-			{
-				if ($next)
-				{
-					$next_one = $i+1;
-				}
-				else
-				{
-					$new_media_id = basename($media_file);
-					break;
-				}
-			}
-			else if (isset($next_one))
-			{
-				$new_media_id = basename($media_file);
-				break;
-			}
-			$i++;
-		}
-		if (!isset($new_media_id)) echo "Reached the end";
-		else $media_id = $new_media_id;
-		
-		if (isset($new_comment)) Comments\insertNewComment($album, $media_id, $new_comment, $valbum['comments_permissions']);
-		if (isset($comment_to_delete)) Comments\deleteComment($album, $media_id, $comment_to_delete, $valbum['comments_permissions'], $valbum['user']);
 		echo "<div class='media_page'>\n";
-		\ShowMediaPage\showMediaPage($valbum_id, $album, $media_id, $valbum['comments_permissions'], $valbum['user']);
+		$valbum = $valbum_array[$valbum_id];
+		
+		if ($next)
+		{
+			$media_id = \ShowVirtualAlbum\getNextMedia($valbum, $media_id);
+		}
+		
+		if (isset($media_id))
+		{
+			if (isset($new_comment)) Comments\insertNewComment($album, $media_id, $new_comment, $valbum['comments_permissions']);
+			if (isset($comment_to_delete)) Comments\deleteComment($album, $media_id, $comment_to_delete, $valbum['comments_permissions'], $valbum['user']);
+			\ShowMediaPage\showMediaPage($valbum_id, $valbum, $media_id);
+		}
+		else
+		{
+			echo "Reached the end of the album.";
+		}
+		
 		echo "</div>\n";
 	}
 	//----------------------------
 	// album page
 	else if (isset($valbum_id))
 	{
-		echo '<script type="text/javascript" src="ajax.js"></script>'."\n";
-	
 		if (isset($valbum_array[$valbum_id]))
 		{
 			$valbum = $valbum_array[$valbum_id];
 			
-			foreach (ShowVirtualAlbum\getListOfDays($album, $valbum['from_date'], $valbum['to_date']) as $day => $nb_elements)
+			foreach (ShowVirtualAlbum\getListOfDays($valbum) as $day => $nb_elements)
 			{
 				echo "\n<div class='new_day'>"
 					."\t<h3>".preg_replace('/:/', '-', $day)."</h3>"
 					."<div id='day-".$day."'>"
 					."<span onClick=\"loadDay(".$valbum_id.",'".$day."')\">";
 
-				ShowVirtualAlbum\showVirtualAlbum(
-					$valbum_id, 
-					$album, 
-					strcmp($day, $valbum['from_date']) < 0 ? $valbum['from_date'] : $day, 
-					strcmp($day."ZZZZZZZZZZ", $valbum['to_date']) < 0 ? $day."ZZZZZZZZZZ" : $valbum['to_date'], 
-					$valbum['comments_permissions'], 
-					isset($_GET['no_insight']) ? false : true);
-					
+				ShowVirtualAlbum\show($valbum_id, $valbum, $day, true);
+				
 				echo "</span>\n"
 					."</div>\n"
 					."</div>\n";
 			}
-			
-			echo '<script type="text/javascript">if (media_ids_to_process.length > 0){generateThumbnailAjax(media_ids_to_process[0], "'.$valbum_id.'");}</script>'."\n";
 		}
 		else
 		{
@@ -236,14 +195,6 @@
 		}
 	}
 ?>
-		<div class='group'>
-			<?php 
-				if (isset($nb_elements)) echo "$nb_elements elements - ";
-				echo (isset($generate_cache_file) && !$cancel_cache_generation?
-					"Cache generated at: ".date('l jS \of F Y h:i:s A')."\n" : 
-					"Cache not generated (".(isset($generate_cache_file)?'1':'0')."-".($cancel_cache_generation?'1':'0').")");
-			?>
-		</div>
 
 <!-- ============================================================================== -->
 
@@ -251,7 +202,3 @@
 
 </body>
 </html>
-
-<?php
-	Cache\finishCache($generate_cache_file, $cancel_cache_generation);
-?>

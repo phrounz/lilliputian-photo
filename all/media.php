@@ -19,8 +19,6 @@
 	//get album from valbum_id
 	$album = isset($valbum_id) && isset($valbum_array[$valbum_id]) ? $valbum_array[$valbum_id]["album"] : null;
 	
-	$valbum = $valbum_array[$valbum_id];
-	
 	// display the image/video
 	if (isset($album))
 	{

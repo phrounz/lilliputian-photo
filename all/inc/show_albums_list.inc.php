@@ -3,6 +3,7 @@
 	error_reporting(E_ALL);
 	require_once("inc/virtual_albums_conf.inc.php");
 	require_once("inc/show_virtual_album.inc.php");
+	require_once("inc/media_access.inc.php");
 
 //----------------------------------------------
 
@@ -11,8 +12,9 @@ function showListOfAlbums($valbum_array)
 	$curr_user = $_SERVER['REMOTE_USER'];
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 	{
-		echo "\n<div class='admin_box'>\n<h2>Albums</h2><p>An album is a subfolder of the <i>albums/</i> directory. As the administrator, you can see them all.</p>"
-			."<p>The thumbnails are automatically generated when watching the album for the first time.</p>\n";
+		echo "\n<div class='admin_box'>\n"
+			."<h2>Albums</h2>\n"
+			."<p>An album is a subfolder of the <i>albums/</i> directory. As the administrator, you can see them all.</p>\n";
 	}
 		
 	echo "<table><tr>\n";
@@ -36,12 +38,12 @@ function showListOfAlbums($valbum_array)
 		{
 			$album_title = $valbum['title'];
 			
-			echo "\n<td class='alb_insight'><a href='".getAlbumUrl($valbum_id)."'>\n"
+			echo "\n<td class='alb_insight'><a href='".\MediaAccess\getAlbumUrl($valbum_id)."'>\n"
 				."<h3 style='position:absolute;'>"
 				."<span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"
 				."$album_title</span></h3><span>";// - ".count($media_files_this_album)." elements
 			
-			\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum['album'], $valbum['from_date'], $valbum['to_date'], $valbum['comments_permissions'], true);
+			\ShowVirtualAlbum\show($valbum_id, $valbum, null, true);
 			echo "</span></a></td>\n";
 			$j++;
 			if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}

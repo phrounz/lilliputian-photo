@@ -3,28 +3,29 @@
 	error_reporting(E_ALL);
 	require_once("conf.inc.php");
 	require_once("media_infos.inc.php");
+	require_once("media_access.inc.php");
 	require_once("comments.inc.php");
 	
 //----------------------------------------------
 
-function showMediaPage($valbum_id, $album, $media_id, $valbum_comments_permissions, $valbum_user)
+function showMediaPage($valbum_id, $valbum, $media_id)
 {
 	$media_html = \MediaInfos\isMediaFileAVideo($media_id) ?
-		"<video id='the_media' src='".getMediaUrl($valbum_id, $media_id)."' controls width='100%' />" :
-		"<a href='".getMediaUrl($valbum_id, $media_id)."'><img id='the_media' src='".getMediaUrlReduced($valbum_id, $media_id)."' alt='' style='height: 750px;'/></a>";
+		"<video id='the_media' src='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."' controls width='100%' />" :
+		"<a href='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."'><img id='the_media' src='".\MediaAccess\getMediaUrlReduced($valbum_id, $media_id)."' alt='' style='height: 750px;'/></a>";
 	
 	$all_commenting = '';
-	$php_this_media = getMediaPageUrl($valbum_id, $media_id);
+	$php_this_media = \MediaAccess\getMediaPageUrl($valbum_id, $media_id);
 	
 	$valbum_user_mod = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];
 
-	if (strpos($valbum_comments_permissions, 'R')!==FALSE)
+	if (strpos($valbum['comments_permissions'], 'R')!==FALSE)
 	{
 		$i = 0;
-		foreach (\Comments\readComments($album, $media_id) as $comment)
+		foreach (\Comments\readComments($valbum['album'], $media_id) as $comment)
 		{
 			$span_delete = '';
-			if (($valbum_comments_permissions == 'RWD' && $valbum_user_mod == $comment['user']) || $valbum_comments_permissions=='RWDA')
+			if (($valbum['comments_permissions'] == 'RWD' && $valbum_user_mod == $comment['user']) || $valbum['comments_permissions']=='RWDA')
 			{
 				$span_delete = "<form style='float: right;' action='$php_this_media' method='POST'>"
 					."<input type='hidden' name='comment_to_delete' value='$i' />"
@@ -35,7 +36,7 @@ function showMediaPage($valbum_id, $album, $media_id, $valbum_comments_permissio
 			$i += 1;
 		}
 		
-		if (strpos($valbum_comments_permissions, 'RW')!==FALSE)
+		if (strpos($valbum['comments_permissions'], 'RW')!==FALSE)
 		{
 			$all_commenting .= ""
 				."<div class='comment_box'><form action='$php_this_media' method='POST'>"

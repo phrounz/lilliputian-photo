@@ -2,13 +2,25 @@
 	namespace MediaAccess;
 	error_reporting(E_ALL);
 	require_once("conf.inc.php");
+	require_once("media_infos.inc.php");
 	
+	// index.php
+	function getListOfAlbumsUrl() { return '?'; }
+	function getAlbumUrl($valbum_id) { return "?q=$valbum_id"; }
+	
+	// media.php (virtual secure access to media file)
+	function getMediaUrl($valbum_id, $media_id) { return "media.php?q=$valbum_id&amp;img=$media_id&amp;content_type=".\MediaInfos\getMimeType($media_id); }
+	function getMediaPageUrl($valbum_id, $media_id) { return "?q=$valbum_id&amp;img=$media_id"; }
+	function getMediaUrlThumb($valbum_id, $media_id) { return getMediaUrl($valbum_id, $media_id, false).'&amp;thumbnail'; }
+	function getMediaUrlReduced($valbum_id, $media_id) { return getMediaUrl($valbum_id, $media_id).'&amp;reduced'; }
+
+	// direct access to media file directories
 	function getAllAlbumsDirs() { return glob(CONST_MEDIA_DIR."/*"); }
-	
 	function getAlbumDir($album) { return CONST_MEDIA_DIR."/".strip_tags($album); }
 	function getAlbumThumbnailDir($album) { return CONST_THUMBNAILS_DIR."/".strip_tags($album); }
 	function getAlbumReducedDir($album) { return CONST_REDUCED_DIR."/".strip_tags($album); }
 	
+	// direct access to media file
 	function getRealMediaFile($album, $media_id) { return CONST_MEDIA_DIR."/".strip_tags("$album/$media_id"); }
 	function getRealThumbFileFromMedia($album, $media_id) { return getFixedPath_(CONST_THUMBNAILS_DIR, $album, $media_id); }
 	function getRealReducedFileFromMedia($album, $media_id) { return getFixedPath_(CONST_REDUCED_DIR, $album, $media_id); }
