@@ -192,7 +192,7 @@ function generateAllThumbsAndReducedPictures_($valbum_array)
 		
 	foreach ($valbum_array as $valbum_id => $valbum)
 	{
-		if (isset($valbum) && $valbum['type'] == 'ALBUM')
+		if (isset($valbum) && $valbum['type'] == 'ALBUM' && $valbum['user'] == CONST_ADMIN_USER)
 		{
 			$album = $valbum['album'];
 			$is_cut = false;
