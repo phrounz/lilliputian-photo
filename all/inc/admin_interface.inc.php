@@ -111,10 +111,10 @@ function showEdition($valbum_array)
 	//----------------------------
 	// Thumbnail and reduced pictures generation
 	
-	echo "\n<div class='admin_box'>\n<h2>Generate thumbnails and reduced pictures</h2>\n"
+	echo "\n<div class='admin_box'>\n<h2>Generate thumbnails</h2>\n"
 		."<p>You should call this after modifying albums."
 		."<form action='".getTargetPage()."' method='POST'>"
-		."<input type='submit' value='Generate missing thumbnails and reduced pictures files' />"
+		."<input type='submit' value='Generate missing thumbnails' />"
 		."<input type='hidden' name='generate_thumbs' value='true' /></form></div>";
 	
 	//----------------------------
