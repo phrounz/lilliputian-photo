@@ -19,6 +19,7 @@ Installation for noobs :
  * Edit the file *inc/conf.inc.php* . You probably don't need to change anything, except that you may like to change the value of *CONST_MAIN_TITLE* (this is the title of all the pages). If you don't understand, don't worry and skip this line.
  * Upload your pictures and video organized as you wish into subdirectories of albums/ , for example with an FTP client. You can remove the directory *example_album*.
  * Go with your browser to the index page, connect as user "admin".
+ * Click on "Generate thumbnails and reduced pictures". Note that this may take a while if you have a lot of pictures.
  * Add visibility for the other users with "Virtual albums and group titles".
  * Click on "disconnect or change user", and now connect with another login to see what visibility you set up.
- * Go in each album and add "&no_insight" at the end of the url to load the thumbnails and reduced version of each picture.
+ 
