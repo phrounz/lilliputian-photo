@@ -21,4 +21,4 @@ Installation for noobs :
  * Go with your browser to the index page, connect as user "admin".
  * Add visibility for the other users with "Virtual albums and group titles".
  * Click on "disconnect or change user", and now connect with another login to see what visibility you set up.
- * Go in each album to load the thumbnails for each picture.
+ * Go in each album and add "&no_insight" at the end of the url to load the thumbnails and reduced version of each picture.
