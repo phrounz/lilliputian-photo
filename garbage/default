@@ -1,5 +1,0 @@
-ALBUM|test_no|example_album|0|ZZZZZZZZZ|NONE
-ALBUM|test_readonly|example_album|0|ZZZZZZZZZ|R
-ALBUM|test_rw|example_album|0|ZZZZZZZZZ|RW
-ALBUM|test_rwd|example_album|0|ZZZZZZZZZ|RWD
-ALBUM|test_rwda|example_album|0|ZZZZZZZZZ|RWDA
