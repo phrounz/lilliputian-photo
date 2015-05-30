@@ -200,7 +200,7 @@ function generateAllThumbsAndReducedPictures_($valbum_array)
 			{
 				$media_id = basename($media_file);
 						
-				if (!file_exists(\MediaAccess\getRealThumbFileFromMedia($album, $media_id)) || !file_exists(\MediaAccess\getRealReducedFileFromMedia($album, $media_id)))
+				if (!file_exists(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id)) || !file_exists(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id)))
 				{
 					echo 'media_ids.push("'.$media_id.'");valbum_ids.push("'.$valbum_id.'");'."\n";
 				}
@@ -208,7 +208,7 @@ function generateAllThumbsAndReducedPictures_($valbum_array)
 		}
 	}
 	echo "\n"
-		.'if (media_ids.length > 0){generateThumbnailAjax(media_ids[0], valbum_ids[0]);}'."\n"
+		.'if (media_ids.length > 0){generateThumbnailAjax(media_ids[0], valbum_ids[0]);}else {alert("Ok, nothing to do!");}'."\n"
 		.'</script>'
 		."\n\n";
 }

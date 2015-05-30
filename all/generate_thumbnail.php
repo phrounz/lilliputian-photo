@@ -11,11 +11,12 @@
 	$valbum_array = VirtualAlbumsConf\listVirtualAlbums();
 	$album = $valbum_array[$valbum_id]["album"];
 	
-	if (!file_exists(CONST_THUMBNAILS_DIR)) mkdir(CONST_THUMBNAILS_DIR);
-	if (!file_exists(CONST_REDUCED_DIR)) mkdir(CONST_REDUCED_DIR);
+	if (!file_exists(dirname(CONST_THUMBNAILS_SMALL_DIR))) mkdir(dirname(CONST_THUMBNAILS_SMALL_DIR));
+	if (!file_exists(CONST_THUMBNAILS_SMALL_DIR)) mkdir(CONST_THUMBNAILS_SMALL_DIR);
+	if (!file_exists(CONST_THUMBNAILS_LARGE_DIR)) mkdir(CONST_THUMBNAILS_LARGE_DIR);
 	
-	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumThumbnailDir($album), false);
-	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumReducedDir($album), true);
+	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getSmallThumbAlbumDir($album), false);
+	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getLargeThumbAlbumDir($album), true);
 
 	//---------------------------------------------------------------------------
 	

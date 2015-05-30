@@ -14,7 +14,8 @@ function generateThumbnailAjax(file_to_process, valbum_id) {
 				if (i < media_ids.length) {
 					generateThumbnailAjax(media_ids[i], valbum_ids[i]);
 				} else {
-					location.reload(true);
+					alert('Ok, finished!');
+					window.location="?";
 				}
 				document.getElementById('main').innerHTML = 
 					"<h2 class='fullscreen_overlay'><br />...Please wait, thumbnail/reduced image "+i+"/"+media_ids.length+" loaded...<br />(virtual album number: "+valbum_id+" - picture: "+file_to_process+"</h2>";

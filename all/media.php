@@ -23,9 +23,9 @@
 	if (isset($album))
 	{
 		if (isset($_GET['thumbnail']))
-			readfile(MediaAccess\getRealThumbFileFromMedia($album, $media_id));
+			readfile(MediaAccess\getRealSmallThumbFromMedia($album, $media_id));
 		else if (isset($_GET['reduced']))
-			readfile(MediaAccess\getRealReducedFileFromMedia($album, $media_id));
+			readfile(MediaAccess\getRealLargeThumbFromMedia($album, $media_id));
 		else
 			readfile(MediaAccess\getRealMediaFile($album, $media_id));
 	}
