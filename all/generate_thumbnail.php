@@ -12,14 +12,16 @@
 	$album = $valbum_array[$valbum_id]["album"];
 	
 	if (!file_exists(CONST_THUMBNAILS_DIR)) mkdir(CONST_THUMBNAILS_DIR);
+	if (!file_exists(CONST_REDUCED_DIR)) mkdir(CONST_REDUCED_DIR);
 	
-	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumThumbnailDir($album));
+	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumThumbnailDir($album), false);
+	generateThumbnail(MediaAccess\getRealMediaFile($album, $media_id), MediaAccess\getAlbumReducedDir($album), true);
 
 	//---------------------------------------------------------------------------
 	
-	function generateThumbnail($media_file, $thumbs_folder)
+	function generateThumbnail($media_file, $output_folder, $is_reduced_instead_of_thumb)
 	{
-		if (!file_exists($thumbs_folder)) mkdir($thumbs_folder);
+		if (!file_exists($output_folder)) mkdir($output_folder);
 		
 		ini_set('memory_limit', '-1');// Allocate all necessary memory for the image.
 		
@@ -29,8 +31,8 @@
 			$img = new Zubrag_image;
 
 			// maximum thumb side size
-			$img->max_x        = CONST_WIDTH_THUMBNAIL;
-			$img->max_y        = CONST_HEIGHT_THUMBNAIL;
+			$img->max_x        = $is_reduced_instead_of_thumb ? CONST_WIDTH_REDUCED_MEDIA : CONST_WIDTH_THUMBNAIL;
+			$img->max_y        = $is_reduced_instead_of_thumb ? CONST_HEIGHT_REDUCED_MEDIA : CONST_HEIGHT_THUMBNAIL;
 			// cut image before resizing. Set to 0 to skip this.
 			$img->cut_x        = 0;
 			$img->cut_y        = 0;
@@ -48,7 +50,7 @@
 			// or set it to -1 to determine automatically
 			$img->image_type   = 2;
 
-			$output_file = $thumbs_folder."/".basename($media_file, ".".$ext).".jpg";
+			$output_file = $output_folder."/".basename($media_file, ".".$ext).".jpg";
 			if (!file_exists($output_file))
 			{
 				echo "Generating $output_file from $media_file ... ";

@@ -6,12 +6,17 @@
 	define('CONST_ALBUM_CONF_DIR', './albums_conf');
 	define('CONST_COMMENTS_DIR', './comments');
 	define('CONST_THUMBNAILS_DIR', './thumbnails');
-	define('CONST_USE_CACHE', true);
+	define('CONST_REDUCED_DIR', './reduced');
+	define('CONST_USE_CACHE', false);
 	define('CONST_CACHE_INDEX_DIR', './cache_index');
 	define('CONST_CACHE_ALBUM_DIR', './cache_album');
 	define('CONST_MAIN_TITLE', 'Photos &amp; videos');
 	// additional security measure but disabled by default because does not work most of the time, depending of your apache configuration:
 	define('CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD', '');
+	
+	// media page
+	define('CONST_WIDTH_REDUCED_MEDIA', 800);
+	define('CONST_HEIGHT_REDUCED_MEDIA', 600);
 	
 	// album page (media thumbnails)
 	define('CONST_WIDTH_THUMBNAIL', 200);
@@ -21,6 +26,14 @@
 	// album list page
 	define('CONST_WIDTH_ALBUM_INSIGHT', 100);
 	define('CONST_HEIGHT_ALBUM_INSIGHT', 75);
-	define('CONST_NB_INSIGHT_PICTURES', 6);
+	define('CONST_NB_INSIGHT_PICTURES', 5);
 	define('CONST_NB_COLUMNS_LIST_ALBUMS', 2);
+	
+	function getListOfAlbumsUrl() { return '?'; }	
+	function getAlbumUrl($valbum_id) { return "?q=$valbum_id"; }
+	function getMediaUrl($valbum_id, $media_id) { return "media.php?q=$valbum_id&amp;img=$media_id&amp;content_type=".MediaInfos\getMimeType($media_id); }
+	function getMediaPageUrl($valbum_id, $media_id) { return "?q=$valbum_id&amp;img=$media_id"; }
+	function getMediaUrlThumb($valbum_id, $media_id) { return getMediaUrl($valbum_id, $media_id, false).'&amp;thumbnail'; }
+	function getMediaUrlReduced($valbum_id, $media_id) { return getMediaUrl($valbum_id, $media_id).'&amp;reduced'; }
+
 ?>

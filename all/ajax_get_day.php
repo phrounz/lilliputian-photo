@@ -5,13 +5,8 @@
 	require_once("inc/media_access.inc.php");
 	require_once("inc/show_virtual_album.inc.php");
 	
-	// GET parameters
-	$content_type = $_GET['content_type'];
-	$valbum_id = $_GET['q'];
-	$media_id = $_GET['img'];
-
-	// set up content-type
-	header("Content-Type: $content_type");
+	$valbum_id = $_GET['valbum_id'];
+	$day = $_GET['day'];
 	
 	// load list of virtual albums for this user
 	$valbum_array = VirtualAlbumsConf\listVirtualAlbums();
@@ -24,11 +19,12 @@
 	// display the image/video
 	if (isset($album))
 	{
-		if (isset($_GET['thumbnail']))
-			readfile(MediaAccess\getRealThumbFileFromMedia($album, $media_id));
-		else if (isset($_GET['reduced']))
-			readfile(MediaAccess\getRealReducedFileFromMedia($album, $media_id));
-		else
-			readfile(MediaAccess\getRealMediaFile($album, $media_id));
+		ShowVirtualAlbum\showVirtualAlbum(
+			$valbum_id, 
+			$album, 
+			strcmp($day, $valbum['from_date']) < 0 ? $valbum['from_date'] : $day, 
+			strcmp($day."ZZZZZZZZZZ", $valbum['to_date']) < 0 ? $day."ZZZZZZZZZZ" : $valbum['to_date'], 
+			$valbum['comments_permissions'], 
+			false);
 	}
 ?>
