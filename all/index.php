@@ -146,8 +146,8 @@
 		
 		if (isset($media_id))
 		{
-			if (isset($new_comment)) Comments\insertNewComment($album, $media_id, $new_comment, $valbum['comments_permissions']);
-			if (isset($comment_to_delete)) Comments\deleteComment($album, $media_id, $comment_to_delete, $valbum['comments_permissions'], $valbum['user']);
+			if (isset($new_comment)) Comments\insertNewComment($valbum['album'], $media_id, $new_comment, $valbum['comments_permissions']);
+			if (isset($comment_to_delete)) Comments\deleteComment($valbum['album'], $media_id, $comment_to_delete, $valbum['comments_permissions'], $valbum['user']);
 			\ShowMediaPage\showMediaPage($valbum_id, $valbum, $media_id);
 		}
 		else
