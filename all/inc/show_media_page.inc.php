@@ -11,7 +11,7 @@
 function showMediaPage($valbum_id, $valbum, $media_id)
 {
 	$media_html = \MediaInfos\isMediaFileAVideo($media_id) ?
-		"<video id='the_media' src='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."' controls width='100%' />" :
+		"<video id='the_media' src='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."' controls width='100%'></video>" :
 		"<a href='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."'><img id='the_media' src='".\MediaAccess\getLargeThumbUrl($valbum_id, $media_id)."' alt='' style='height: 750px;'/></a>";
 	
 	$all_commenting = '';

@@ -32,7 +32,6 @@
 	
 		$thm_file = "$media_file_without_ext.THM";
 		$jpg_helper_file = "$media_file_without_ext.JPG";
-		
 		if (($ext != 'jpg' && $ext != 'JPG') && file_exists($thm_file))
 			$thumb_file = $thm_file;
 		else if ($ext == 'MOV' && file_exists($jpg_helper_file))
@@ -41,6 +40,7 @@
 			$thumb_file = "$media_file_without_ext.jpg";
 		else
 			$thumb_file = "video.png";
+		//echo "$ext - $thumb_file";
 		return $thumb_file;
 	}
 ?>

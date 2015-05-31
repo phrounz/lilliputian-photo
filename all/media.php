@@ -10,9 +10,6 @@
 	$valbum_id = $_GET['q'];
 	$media_id = $_GET['img'];
 
-	// set up content-type
-	header("Content-Type: $content_type");
-	
 	// load list of virtual albums for this user
 	$valbum_array = VirtualAlbumsConf\listVirtualAlbums();
 	
@@ -22,11 +19,22 @@
 	// display the image/video
 	if (isset($album))
 	{
+		$filepath = null;
 		if (isset($_GET['thumbnail']))
-			readfile(MediaAccess\getRealSmallThumbFromMedia($album, $media_id));
+			$filepath = MediaAccess\getRealSmallThumbFromMedia($album, $media_id);
 		else if (isset($_GET['reduced']))
-			readfile(MediaAccess\getRealLargeThumbFromMedia($album, $media_id));
+			$filepath = MediaAccess\getRealLargeThumbFromMedia($album, $media_id);
 		else
-			readfile(MediaAccess\getRealMediaFile($album, $media_id));
+			$filepath = MediaAccess\getRealMediaFile($album, $media_id);
+		
+		// hack the content-type if this is a png video thumb
+		$content_type_parts = explode('/', $content_type);
+		if (pathinfo($filepath, PATHINFO_EXTENSION) == 'png' && array_shift($content_type_parts) == 'video') $content_type = 'image/png';
+		
+		// set up content-type
+		header("Content-Type: $content_type");
+		
+		// show the file
+		readfile($filepath);
 	}
 ?>

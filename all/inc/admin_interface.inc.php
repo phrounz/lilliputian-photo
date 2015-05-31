@@ -33,13 +33,21 @@ function doPostOperations()
 	else if (isset($_FILES['album_addmedia__file']))
 	{
 		$str_pst = 'File upload';
-		if (!file_exists(\MediaAccess\getAlbumDir($_POST['album_addmedia__album'])) || !isset($_POST['album_addmedia__album'])) die();
-		$res = move_uploaded_file($_FILES['album_addmedia__file']['tmp_name'], \MediaAccess\getRealMediaFile($_POST['album_addmedia__album'], $_FILES['album_addmedia__file']['name']));
+		$album = $_POST['album_addmedia__album'];
+		$media_id = $_FILES['album_addmedia__file']['name'];
+		if (!isset($album) || !file_exists(\MediaAccess\getAlbumDir($album))) die();
+		if (file_exists(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id))) unlink(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id));
+		if (file_exists(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id))) unlink(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id));
+		$res = move_uploaded_file($_FILES['album_addmedia__file']['tmp_name'], \MediaAccess\getRealMediaFile($album, $media_id));
 	}
 	else if (isset($_POST['album_removemedia_filename']))
 	{
 		$str_pst = 'File removal of <i>'.$_POST['album_removemedia_filename'].'</i> in album <i>'.$_POST['album_removemedia_album'].'</i>';
-		$res = unlink(\MediaAccess\getRealMediaFile($_POST['album_removemedia_album'], $_POST['album_removemedia_filename']));
+		$album = $_POST['album_removemedia_album'];
+		$media_id = $_POST['album_removemedia_filename'];
+		$res = unlink(\MediaAccess\getRealMediaFile($album, $media_id));
+		if (file_exists(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id))) unlink(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id));
+		if (file_exists(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id))) unlink(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id));
 	}
 	else if (isset($_POST['album_remove']) && strip_tags($_POST['album_remove'])!='')
 	{
