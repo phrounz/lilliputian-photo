@@ -78,6 +78,11 @@ function doPostOperations()
 		$str_pst = "Virtual album or group title <i>".$_POST['valbum_removal__title']."</i> (of user <i>".$_POST['valbum_removal__user']."</i>) removal";
 		$res = \VirtualAlbumsConf\removeVirtualAlbumOrTitle($_POST['valbum_removal__title'], $_POST['valbum_removal__user']);
 	}
+	else if (isset($_POST['valbum_reorder__title']))
+	{
+		$str_pst = "Virtual album or group title <i>".$_POST['valbum_removal__title']."</i> (of user <i>".$_POST['valbum_removal__user']."</i>) reorder";
+		$res = \VirtualAlbumsConf\reorderVirtualAlbumOrTitle($_POST['valbum_reorder__title'], $_POST['valbum_reorder__user'], $_POST['valbum_reorder__action']);
+	}
 	else if (isset($_POST['valbum_newuser']))
 	{
 		$str_pst = "Add of <i>".$_POST['valbum_newuser']."</i> in specific rights";
@@ -97,8 +102,27 @@ function doPostOperations()
 function showEdition($valbum_array)
 {
 	//----------------------------
+	// Create a new user
+	echo "\n<div class='admin_box'>\n<h2>Specific rights for a user</h2>\n"
+		
+		."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p><ul>"
+		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
+		."<li>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</li>";
+		
+	$removable_users_opts = getSelectUsers('valbum_removeuser', true);
+	if (strlen($removable_users_opts) > 0)
+	{
+		echo "<li>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</li>";
+		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
+	}
+	echo "</ul></div>\n";
+	
+	//----------------------------
 	// Album management
+	
 	echo "\n<div class='admin_box'>\n<h2>Album management</h2>\n"
+	
+		."<h4>Manage media files</h4>"
 		
 		."<p>It's advised to upload the albums manually (with an FTP client, for example) instead of using the buttons below, it's more practical to upload <i>en masse</i>.</p><ul>\n"
 			
@@ -115,81 +139,14 @@ function showEdition($valbum_array)
 	$empty_albums = getSelectEmptyAlbums('album_remove');
 	if (strlen($empty_albums)>0) echo "<li>".htmlMiniForm("Remove an empty album $empty_albums", "Remove")."</li>\n";
 		
-	echo "</ul></div>\n";
+	echo "</ul>\n";
 	
-	//----------------------------
-	// Thumbnail and reduced pictures generation
-	
-	echo "\n<div class='admin_box'>\n<h2>Generate thumbnails</h2>\n"
-		."<p>You should call this after modifying albums."
-		."<form action='".getTargetPage()."' method='POST'>"
+	echo "\n<h4>Generate thumbnails</h4>\n" // Thumbnail and reduced pictures generation
+		."<form action='".getTargetPage()."' method='POST'>You should press this button after modifying albums: "
 		."<input type='submit' value='Generate missing thumbnails' />"
-		."<input type='hidden' name='generate_thumbs' value='true' /></form></div>";
-	
-	//----------------------------
-	// Virtual albums and group titles
-	echo "\n<div class='admin_box'>\n<h2>Virtual albums and group titles</h2>\n"
-		."<p>This allows to create a visibility on an album or a part of an album, for some authenticated user(s).</p><ul>\n"
-		."<li><form action='".getTargetPage()."' method='POST'><input type='hidden' name='valbum_add__type' value='ALBUM' />\n"
-		."Create a new <b>virtual album</b> named <input type='text' name='valbum_add__title' value='' />"
-		."<br />for user <select name='valbum_add__user'>";
-	foreach (\VirtualAlbumsConf\getUsers(false) as $registered_user) echo "<option>$registered_user</option>";
-	echo "</select><small> (Note: <i>".CONST_DEFAULT_USER."</i> applies to all users without specific rights; if you want to make specific rights for a given user, see below)</small>."
-		."<br />allowing visibility on the album ".getSelectAlbums('valbum_add__album')
-		."<br />starting from <input type='text' name='valbum_add__beginning' value='0' /><small> (0 means the beginning of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
-		."<br />until <input type='text' name='valbum_add__end' value='ZZZZZZZZZ' /><small> (ZZZZZZZZZ means the end of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
-		."<br />and about commenting: <input type='radio' name='valbum_add__comments_permissions' value='NONE'>no access</input> - "
-		."<input type='radio' name='valbum_add__comments_permissions' value='R'>read access</input> - "
-		."<input type='radio' name='valbum_add__comments_permissions' value='RW'>read/write</input> - "
-		."<input type='radio' name='valbum_add__comments_permissions' value='RWD' checked>read/write + delete own comments</input> - "
-		."<input type='radio' name='valbum_add__comments_permissions' value='RWDA'>read/write + delete all comments</input>"
-		."<br />With main thumbnail picture: <input type='text' name='valbum_add__album_thumb_picture' value='' /> "
-		."<small>(example: <i>IMG1234.jpg</i>, look in the album for name) (let blank for automatic pictures combination) "
-		."(you can put several pictures, separated by \"/\", for random selection)</small>"
-		."<br /><input type='submit' value='Add virtual album' />\n"
-		."</form></li><br />\n"
-
-		."<li><form action='".getTargetPage()."' method='POST'><input type='hidden' name='valbum_add__type' value='GROUP_TITLE' />\n"
-		."Create a new <b>group title</b> named <input type='text' name='valbum_add__title' value='' /> "
-		."visible by user ".getSelectUsers('valbum_add__user', false)
-		."<input type='submit' value='Add group title' />\n"
-		."</form></li><br />\n";
-
-	$curr_user = CONST_ADMIN_USER;
-	$i=0;
-	foreach ($valbum_array as $valbum)
-	{
-		if ($valbum['user'] != $curr_user)
-		{
-			if ($curr_user!=CONST_ADMIN_USER) echo "<input type='submit' value='Remove'></input></select></form></li><br />";
-			$curr_user=$valbum['user'];			
-			echo ""
-				."<li><form action='".getTargetPage()."' method='POST'>"
-				."Remove <i>$curr_user</i>&#39;s virtual album or group title <input type='hidden' name='valbum_removal__user' value='$curr_user' />"
-				."<select name='valbum_removal__title'>";
-			$i+=1;
-		}
-		if ($curr_user!=CONST_ADMIN_USER) echo "<option>".$valbum['title']."</option>";
-	}
-	if ($i > 0) echo "<input type='submit' value='Remove'></input></select></form></li><br />";
-	
-	echo "</ul></div>\n";
-	
-	//----------------------------
-	// Create a new user
-	echo "\n<div class='admin_box'>\n<h2>Specific rights for a user</h2>\n"
-		
-		."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p><ul>"
-		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
-		."<li>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</li>";
-		
-	$removable_users_opts = getSelectUsers('valbum_removeuser', true);
-	if (strlen($removable_users_opts) > 0)
-	{
-		echo "<li>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</li>";
-		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
-	}
-	echo "</ul></div>\n";
+		."<input type='hidden' name='generate_thumbs' value='true' />"
+		."</form>"
+		."</div>\n\n";
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------

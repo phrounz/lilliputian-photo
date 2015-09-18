@@ -101,7 +101,7 @@
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 	{
 		list($str_op, $res) = AdminInterface\doPostOperations();
-		if ($str_op!='') $str_pst = "<div class='admin_box'>\n<font color='".($res?'blue':'red')."'>\n$str_op ".($res?'succeeded.':'failed.')."</font>\n</div>\n";
+		if ($str_op!='') $str_pst = "<div class='admin_success_failure_box'>\n<font color='".($res?'blue':'red')."'>\n$str_op ".($res?'succeeded.':'failed.')."<br /><a href='?'>Ok</a></font>\n</div>\n";// onclick='this.style.display=\"none\";'
 	}
 
 	// load list of virtual albums visible by this user

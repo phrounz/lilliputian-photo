@@ -66,10 +66,22 @@ textarea
 
 /*-------------------------------*/
 
+.admin_success_failure_box
+{
+	position: fixed;
+	left: 100px;
+	top: 30px;
+	width: 600px;
+	height: 50px;
+	padding: 15px;
+	background:rgba(255,255,255,0.8);
+	border: 1px solid black;
+}
+
 .admin_box
 {
 	margin-bottom: 30px;
-	border-left: 15px solid #bbbbbb;
+	border: 15px solid #bbbbbb;
 	padding: 30px;
 }
 
@@ -93,11 +105,25 @@ textarea
 	/*padding: 30px;*/
 }
 
-.group {
+.group h2 {
 	/*border-top: 1px solid #aaaaaa;*/
-	padding-left: 30px;
-	padding-right: 30px;
-	padding-top: 50px;
+	padding: 15px;
+	margin: 15px;
+	margin-top: 50px;
+}
+
+.group table{
+	display: none;
+}
+
+.group:hover table{
+	display: block;
+}
+
+.admin_grey_box {
+	padding: 15px;
+	margin: 15px;
+	background-color: #dddddd;
 }
 
 .alb_insight {

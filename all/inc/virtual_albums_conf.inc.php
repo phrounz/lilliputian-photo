@@ -123,6 +123,77 @@ function removeVirtualAlbumOrTitle($title, $user)
 	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", $output) !== FALSE;
 }
 
+//----------------------------------------------
+
+function reorderVirtualAlbumOrTitle($title, $user, $action)
+{
+	$handle = fopen(CONST_ALBUM_CONF_DIR."/$user", "r");
+	$output = '';
+	$lines = array();
+	if (isset($handle))
+	{
+		while (($data = fgetcsv($handle, 1000, "|")) !== FALSE)
+		{
+			array_push($lines, $data);
+		}
+	}
+	fclose($handle);
+	
+	$i=0;
+	$current_group_index = 0;
+	foreach ($lines as $line)
+	{
+		if ($line[0] == 'GROUP_TITLE')
+		{
+			$current_group_index = $i;
+		}
+		if ($line[1] == $title)
+		{
+			if ($action == 'MoveTop' && $i>0)
+			{
+				$out = array_splice($lines, $i, 1);
+				array_splice($lines, 0, 0, $out);
+				break;
+			}
+			elseif ($action == 'MoveBeginningGroup' && $i>0)
+			{
+				$out = array_splice($lines, $i, 1);
+				array_splice($lines, $current_group_index+1, 0, $out);
+				break;
+			}
+			elseif ($action == 'MoveUp' && $i>0)
+			{
+				$out = array_splice($lines, $i, 1);
+				array_splice($lines, $i-1, 0, $out);
+				break;
+			}
+			elseif ($action == 'MoveDown' && $i<count($lines))
+			{
+				$out = array_splice($lines, $i, 1);
+				array_splice($lines, $i+1, 0, $out);
+				break;
+			}
+			elseif ($action == 'MoveBottom' && $i<count($lines))
+			{
+				$out = array_splice($lines, $i, 1);
+				array_splice($lines, count($lines), 0, $out);
+				break;
+			}
+			else
+			{
+				print_r("ERROR: $action unknown");
+			}
+		}
+		$i++;
+	}
+	foreach ($lines as $line)
+	{
+		$output .= implode('|', $line)."\n";
+	}
+	
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", $output) !== FALSE;
+}
+
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // private function
 //----------------------------------------------------------------------------------------------------------------------------------------------
