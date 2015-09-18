@@ -31,20 +31,39 @@ function showListOfAlbums($valbum_array)
 			
 		if ($valbum['type'] == 'GROUP_TITLE')
 		{
-			echo "</tr>\n<tr><td class='group'><h3>".$valbum["title"]."</h3></td></tr>\n<tr>";//</table>\n\n<table>
+			echo "</tr>\n<tr><td class='group'><h2>".$valbum["title"]."</h2></td></tr>\n<tr>";//</table>\n\n<table>
 			$j=0;
 		}
 		else if ($valbum['type'] == 'ALBUM')
 		{
 			$album_title = $valbum['title'];
 			
-			echo "\n<td class='alb_insight'><a href='".\MediaAccess\getAlbumUrl($valbum_id)."'>\n"
-				."<h3 style='position:absolute;'>"
-				."<span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"
-				."$album_title</span></h3><span>";// - ".count($media_files_this_album)." elements
+			echo "\n<td><div class='alb_insight'><a href='".\MediaAccess\getAlbumUrl($valbum_id)."'>\n"
+				."  <span>";// - ".count($media_files_this_album)." elements
 			
-			\ShowVirtualAlbum\show($valbum_id, $valbum, null, true);
-			echo "</span></a></td>\n";
+			if (isset($valbum["album_thumb_picture"]) && $valbum["album_thumb_picture"]!='')
+			{
+				$pic = $valbum["album_thumb_picture"];
+				if (strstr($pic, '/'))
+				{
+					$array_pics = explode('/', $valbum["album_thumb_picture"]);
+					$pic = $array_pics[array_rand($array_pics, 1)];
+				}
+				echo "    <img class='album_thumb_picture' src='".(\MediaAccess\getLargeThumbUrl($valbum_id, $pic))."' alt=''>\n";
+			}
+			else
+			{
+				echo "    <span style='text-align: center;'>";
+				\ShowVirtualAlbum\show($valbum_id, $valbum, null, true, false, 2);
+				echo "</span>\n";
+			}
+				
+			echo "    <h4><span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"."$album_title</span></h4>";
+			// style='position:absolute;'
+				
+			echo "  </span>\n"
+				."</a></div></td>\n";
+			
 			$j++;
 			if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}
 		}

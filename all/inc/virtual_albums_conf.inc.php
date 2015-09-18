@@ -51,9 +51,9 @@ function listVirtualAlbums()
 
 //----------------------------------------------
 
-function createVirtualAlbum($title, $album, $from_date, $to_date, $comments_permissions, $user)
+function createVirtualAlbum($title, $album, $from_date, $to_date, $comments_permissions, $user, $album_thumb_picture)
 {
-	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date|$comments_permissions\n", FILE_APPEND) !== FALSE;
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date|$comments_permissions|$album_thumb_picture\n", FILE_APPEND) !== FALSE;
 }
 
 //----------------------------------------------
@@ -155,7 +155,8 @@ function readVirtualAlbumConfFile($album_conf_file)
 							'from_date' => $data[3], 
 							'to_date' => $data[4], 
 							'comments_permissions' => $data[5],
-							'user' => $user
+							'user' => $user,
+							'album_thumb_picture' => $data[6]
 							));
 				}
 				else if ($data[0] == 'GROUP_TITLE') // add a title for a group of virtual albums

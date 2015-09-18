@@ -26,6 +26,7 @@ function getListOfDays($valbum)
 		if (\MediaInfos\isReallyAMediaFile($media_file))
 		{
 			$date_file = \MediaInfos\getDateTaken($media_file);
+			
 			if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
 			{
 				$day_file = substr($date_file, 0, 10);
@@ -70,6 +71,7 @@ function getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, &$is_
 		if (\MediaInfos\isReallyAMediaFile($media_file))
 		{
 			$date_file = \MediaInfos\getDateTaken($media_file);
+			
 			if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
 			{
 				$date_media_files[$media_file] = $date_file;
@@ -90,7 +92,7 @@ function getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, &$is_
 
 //----------------------------------------------
 
-function show($valbum_id, $valbum, $day, $is_insight)
+function show($valbum_id, $valbum, $day, $is_insight, $show_ext_dots, $line_return_every_or_null)
 {
 	$from_date = isset($valbum['from_date']) ? $valbum['from_date'] : '';
 	$to_date = isset($valbum['to_date']) ? $valbum['to_date'] : 'ZZZZZZZZZZZZZZZZZZZ';
@@ -101,14 +103,16 @@ function show($valbum_id, $valbum, $day, $is_insight)
 		isset($day) && strcmp($day, $from_date) > 0 ? $day : $from_date, 
 		isset($day) && strcmp($day."ZZZZZZZZZZ", $to_date) < 0 ? $day."ZZZZZZZZZZ" : $to_date, 
 		$valbum['comments_permissions'], 
-		$is_insight);
+		$is_insight,
+		$show_ext_dots,
+		$line_return_every_or_null);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-function showVirtualAlbum_($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight)
+function showVirtualAlbum_($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight, $show_ext_dots, $line_return_every_or_null)
 {
 	$is_cut = false;
 	$date_media_files = getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, $is_cut);
@@ -120,10 +124,11 @@ function showVirtualAlbum_($valbum_id, $album, $from_date, $to_date, $comments_p
 		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
 		$day = substr($date_file, 0, 10);
 		$media_id = basename($media_file);
+		if (isset($line_return_every_or_null) && $i % $line_return_every_or_null == 0) echo "<br />";
 		showMediaThumb_($valbum_id, $album, $media_id, !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
 		$i++;
 	}
-	if ($is_insight)
+	if ($is_insight && $show_ext_dots)
 	{
 		echo "<img src='three_dots.png' alt='...' class='three_dots' />";
 	}

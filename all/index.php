@@ -8,7 +8,7 @@
 	require_once("inc/show_virtual_album.inc.php");
 	require_once("inc/show_albums_list.inc.php");
 	require_once("inc/show_media_page.inc.php");
-			
+	
 	\VirtualAlbumsConf\createDefaultUserIfNotExists();
 	
 	// GET parameters
@@ -57,9 +57,14 @@
 			width: <?php echo CONST_WIDTH_ALBUM_INSIGHT; ?>px;
 			height: <?php echo CONST_HEIGHT_ALBUM_INSIGHT; ?>px;
 		}
-		.alb_insight .three_dots {
-			width: <?php echo CONST_WIDTH_ALBUM_INSIGHT*30/200; ?>px;
-			height: <?php echo CONST_HEIGHT_ALBUM_INSIGHT; ?>px;
+		.alb_insight {
+			width: <?php echo CONST_WIDTH_ALBUM_INSIGHT_BOX; ?>px;
+			height: <?php echo CONST_HEIGHT_ALBUM_INSIGHT_BOX; ?>px;
+		}
+		
+		.album_thumb_picture {
+			width: <?php echo CONST_WIDTH_ALBUM_THUMB_PICTURE; ?>px;
+			height: <?php echo CONST_HEIGHT_ALBUM_THUMB_PICTURE; ?>px;
 		}
 		
 		<?php
@@ -172,7 +177,7 @@
 					."<div id='day-".$day."'>"
 					."<span onClick=\"loadDay(".$valbum_id.",'".$day."')\">";
 
-				ShowVirtualAlbum\show($valbum_id, $valbum, $day, true);
+				ShowVirtualAlbum\show($valbum_id, $valbum, $day, true, true, null);
 				
 				echo "</span>\n"
 					."</div>\n"

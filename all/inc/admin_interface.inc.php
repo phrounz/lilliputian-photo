@@ -65,7 +65,8 @@ function doPostOperations()
 			$_POST['valbum_add__beginning'], 
 			$_POST['valbum_add__end'], 
 			$_POST['valbum_add__comments_permissions'], 
-			$_POST['valbum_add__user']);
+			$_POST['valbum_add__user'],
+			$_POST['valbum_add__album_thumb_picture']);
 	}
 	else if (isset($_POST['valbum_add__type']) && $_POST['valbum_add__type']=='GROUP_TITLE')
 	{
@@ -142,6 +143,9 @@ function showEdition($valbum_array)
 		."<input type='radio' name='valbum_add__comments_permissions' value='RW'>read/write</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='RWD' checked>read/write + delete own comments</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='RWDA'>read/write + delete all comments</input>"
+		."<br />With main thumbnail picture: <input type='text' name='valbum_add__album_thumb_picture' value='' /> "
+		."<small>(example: <i>IMG1234.jpg</i>, look in the album for name) (let blank for automatic pictures combination) "
+		."(you can put several pictures, separated by \"/\", for random selection)</small>"
 		."<br /><input type='submit' value='Add virtual album' />\n"
 		."</form></li><br />\n"
 
@@ -157,7 +161,7 @@ function showEdition($valbum_array)
 	{
 		if ($valbum['user'] != $curr_user)
 		{
-			if ($curr_user!=CONST_ADMIN_USER) echo "<input type='submit' value='Remove' /></select></form></li><br />";
+			if ($curr_user!=CONST_ADMIN_USER) echo "<input type='submit' value='Remove'></input></select></form></li><br />";
 			$curr_user=$valbum['user'];			
 			echo ""
 				."<li><form action='".getTargetPage()."' method='POST'>"
@@ -167,7 +171,7 @@ function showEdition($valbum_array)
 		}
 		if ($curr_user!=CONST_ADMIN_USER) echo "<option>".$valbum['title']."</option>";
 	}
-	if ($i > 0) echo "<input type='submit' value='Remove' /></select></form></li><br />";
+	if ($i > 0) echo "<input type='submit' value='Remove'></input></select></form></li><br />";
 	
 	echo "</ul></div>\n";
 	

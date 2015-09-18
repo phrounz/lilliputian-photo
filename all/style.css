@@ -17,7 +17,6 @@ body, p, td
 .header {
 	margin: 30px 30px 0px 30px;
 	padding: 10px 30px 10px 30px;
-	border-top: 1px solid #aaaaaa;
 }
 
 /*-------------------------------*/
@@ -79,36 +78,47 @@ textarea
 }
 
 .new_day {
-	border-top: 1px solid #aaaaaa;
 	padding-left: 30px;
 	padding-right: 30px;
 	padding-bottom: 30px;
+	padding: 15px;
+	margin: 15px;
+	background-color: #dddddd;
 }
 
 .media_page {
-	border-top: 1px solid #aaaaaa;
-	padding: 30px;
+	padding: 15px;
+	margin: 15px;
+	background-color: #dddddd;
+	/*padding: 30px;*/
 }
 
 .group {
-	border-top: 1px solid #aaaaaa;
+	/*border-top: 1px solid #aaaaaa;*/
 	padding-left: 30px;
 	padding-right: 30px;
+	padding-top: 50px;
 }
 
 .alb_insight {
-	padding: 30px;
-	position: relative;
+	word-wrap: break-word;
+	width: 100%;
+	/*position: relative;*/
+	padding: 15px;
+	margin: 15px;
+	background-color: #dddddd;
 }
 
 .alb_insight h3 span.normal {
-	background: rgba(0, 0, 0, 0.7);
+	/*background: rgba(0, 0, 0, 0.7);
 	padding: 10px;
+	line-height: 50px;*/
 }
 
 .alb_insight h3 span.admin {
-	background: rgba(0, 0, 0, 0.7);/*rgba(128, 0, 0, 0.7);*/
+	/*background: rgba(128, 0, 0, 0.7);
 	padding: 10px;
+	line-height: 50px;*/
 }
 
 a .insight_video {
@@ -123,6 +133,7 @@ a:hover .insight_video {
 a{text-decoration: none;background-color: inherit;color: #909090;}
 a.inheritant {background-color: inherit;color: inherit;}
 
+.alb_insight a { color: black; }
 /*-------------------------------*/
 
 .fullscreen_overlay { 
