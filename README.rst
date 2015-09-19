@@ -12,7 +12,7 @@ What it looks like :
 Installation for noobs :
  * Copy all the files in all/ on your web server, for example with an `FTP client <https://filezilla-project.org>`_.
   * If this is not bound to be public (e.g. shared with friends or family), it is highly advised to put it in a hidden path in the website. For example, if your domain is *example.com*, you can put it in a folder named *www.example.com/56165452012132135/*, with 56165452012132135 being a random number, and share this url only with the people you want. This is a simple additional security measure, but quite useful.
- * This service use `Basic Authentication <https://en.wikipedia.org/wiki/Basic_access_authentication>`_ (with the php variable *$_SERVER['REMOTE_USER']*), and requires at least a user "admin" to work. HTTPS is not compulsory but highly advised.
+ * This service use `Basic Authentication <https://en.wikipedia.org/wiki/Basic_access_authentication>`_ (with the php variable *$_SERVER['REMOTE_USER']*), and requires at least a user "admin" to work. You have to setup yourself the list of users allowed to authenticate (e.g. /cgi-bin/.htpasswd for apache). HTTPS is not compulsory but highly advised.
   * If this is an Apache web server, edit *.htaccess*, and setup your users in the *.htpasswd* file. 
   * If this is not an Apache web server, remove *.htaccess* and well... read the manual.
   * If you don't understand, ask your hoster for help.
@@ -22,6 +22,6 @@ Installation for noobs :
 Administration after installation (currently a little bit complex for the average users):
  * Go with your browser to the index page, connect as user "admin".
  * Click on "Generate missing thumbnails" (may take a while if you have a lot of pictures) and then "Generate missing .htaccess files".
- * Add visibility for the other users, using "create a new virtual album" for the *default* users or a new user of your choice (in this latter case, add "Specific rights for a user" first).
+ * Add visibility for the other users, using "create a new virtual album" for all (=*default*) users or a specific user of your choice (in this latter case, add it in "Specific rights for a user" first).
  * Click on "disconnect or change user", and now connect with another login to see what visibility you set up.
  
