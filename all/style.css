@@ -71,13 +71,13 @@ textarea
 	/*overflow:scroll;
 	height: 200px;*/
 	padding: 15px;
-	margin: 15px;
-	background-color: #dddddd;
+	margin: 15px;	
 }
 
 .connection_log table
 {
 	border-collapse: collapse;
+	background-color: #dddddd;
 }
 .connection_log td
 {
@@ -100,7 +100,8 @@ textarea
 .admin_box
 {
 	margin-bottom: 30px;
-	border: 15px solid #bbbbbb;
+	/*border-left: 15px solid #bbbbbb;*/
+	border-top: 1px solid black;
 	padding: 30px;
 }
 
@@ -142,7 +143,7 @@ textarea
 .admin_grey_box {
 	padding: 15px;
 	margin: 15px;
-	background-color: #dddddd;
+	/*background-color: #dddddd;*/
 }
 
 .alb_insight {
