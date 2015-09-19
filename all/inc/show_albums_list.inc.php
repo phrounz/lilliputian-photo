@@ -26,9 +26,19 @@ function showListOfAlbums($valbum_array)
 	{
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $valbum['user'] != $curr_user)
 		{
-			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n";
+			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n"
+				."\n\n<div class='admin_box'><h2>";
 			$curr_user=$valbum['user'];
-			echo "\n\n<div class='admin_box'><h2>Visibility for user: <i>".$curr_user."</i></h2>\n\n<table><tr>";
+			if ($curr_user == CONST_DEFAULT_USER)
+			{
+				$other_users = \VirtualAlbumsConf\getUsers(true);
+				echo "Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '');
+			}
+			else
+			{
+				echo "Visibility for user: <i>".$curr_user."</i>";
+			}
+			echo "</h2>\n\n<table><tr>";
 			$j=0;
 		}
 			
@@ -86,7 +96,7 @@ function showListOfAlbums($valbum_array)
 		{
 			if (\VirtualAlbumsConf\isUserConfEmpty($user))
 			{
-				echo "<div class='admin_box'><h2>Stuff visible by: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>"
+				echo "<div class='admin_box'><h2>Visibility for user: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>"
 					.getCreateVirtualAlbumOrGroupButtons_($user)."</div>";
 			}
 		}
