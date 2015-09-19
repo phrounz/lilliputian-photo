@@ -86,7 +86,7 @@ function doPostOperations()
 	}
 	else if (isset($_POST['valbum_reorder__title']))
 	{
-		$str_pst = "Virtual album or group title <i>".$_POST['valbum_removal__title']."</i> (of user <i>".$_POST['valbum_removal__user']."</i>) reorder";
+		$str_pst = "Virtual album or group title <i>".$_POST['valbum_reorder__title']."</i> (of user <i>".$_POST['valbum_reorder__user']."</i>) reorder";
 		$res = \VirtualAlbumsConf\reorderVirtualAlbumOrTitle($_POST['valbum_reorder__title'], $_POST['valbum_reorder__user'], $_POST['valbum_reorder__action']);
 	}
 	else if (isset($_POST['valbum_newuser']))
