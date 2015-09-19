@@ -19,7 +19,7 @@ Installation for noobs :
  * Edit the file *inc/conf.inc.php* . You probably don't need to change anything, except that you may like to change the value of *CONST_MAIN_TITLE* (this is the title of all the pages). If you don't understand, don't worry and skip this line.
  * Upload your pictures and video organized as you wish into subdirectories of albums/ , for example with an FTP client. You can remove the directory *example_album*.
  
- Administration after installation (currently a little bit complex for the average users):
+Administration after installation (currently a little bit complex for the average users):
  * Go with your browser to the index page, connect as user "admin".
  * Click on "Generate missing thumbnails" (may take a while if you have a lot of pictures) and then "Generate missing .htaccess files".
  * Add visibility for the other users, using "create a new virtual album" for the *default* users or a new user of your choice (in this latter case, add "Specific rights for a user" first).
