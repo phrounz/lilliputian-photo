@@ -22,6 +22,6 @@ Installation for noobs :
 Administration after installation (currently a little bit complex for the average users):
  * Go with your browser to the index page, connect as user "admin".
  * Click on "Generate missing thumbnails" (may take a while if you have a lot of pictures) and then "Generate missing .htaccess files".
- * Add visibility for the other users, using "create a new virtual album" for all (=*default*) users or a specific user of your choice (in this latter case, add it in "Specific rights for a user" first).
+ * Add visibility for the other users, using "create a new virtual album" for all users, or a specific user of your choice (in this latter case, add it in "Specific rights for a user" first).
  * Click on "disconnect or change user", and now connect with another login to see what visibility you set up.
  
