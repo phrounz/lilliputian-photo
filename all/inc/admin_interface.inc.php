@@ -109,19 +109,19 @@ function showEdition($valbum_array)
 {
 	//----------------------------
 	// Create a new user
-	echo "\n<div class='admin_box'>\n<h2>Specific rights for a user</h2>\n"
+	echo "\n<div class='admin_box'>\n<h2>Visibility for a specific user</h2>\n"
 		
-		."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p><ul>"
+		//."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p>"
 		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
-		."<li>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</li>";
+		."<p>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
 		
 	$removable_users_opts = getSelectUsers('valbum_removeuser', true);
 	if (strlen($removable_users_opts) > 0)
 	{
-		echo "<li>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</li>";
+		echo "<p>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</p>";
 		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
 	}
-	echo "</ul></div>\n";
+	echo "</div>\n";
 	
 	//----------------------------
 	// Album management
