@@ -6,7 +6,3 @@ RewriteEngine On
 RewriteCond %{SERVER_PORT} 80
 SetEnv PHP_VER 5_4
 Options -Indexes
-<Files ~ "^stats.txt">
-	Order allow,deny
-	Deny from all
-</Files>

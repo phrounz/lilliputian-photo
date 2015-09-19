@@ -19,7 +19,11 @@ function insertNewComment($album, $media_id, $new_comment, $valbum_comments_perm
 	if (strpos($valbum_comments_permissions, 'RW')!==FALSE)
 	{
 		if (!file_exists(CONST_COMMENTS_DIR)) mkdir(CONST_COMMENTS_DIR);
-		if (!file_exists(CONST_COMMENTS_DIR."/$album")) mkdir(CONST_COMMENTS_DIR."/$album");
+		if (!file_exists(CONST_COMMENTS_DIR."/$album"))
+		{
+			mkdir(CONST_COMMENTS_DIR."/$album");
+			file_put_contents(CONST_COMMENTS_DIR."/$album/.htaccess", "Deny from all");
+		}
 		
 		$comments_file = getCommentFileFromMedia_($album, $media_id);
 		$connected_user = $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER ? '' : $_SERVER['REMOTE_USER'];

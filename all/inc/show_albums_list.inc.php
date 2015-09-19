@@ -28,7 +28,7 @@ function showListOfAlbums($valbum_array)
 		{
 			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n";
 			$curr_user=$valbum['user'];
-			echo "\n\n<div class='admin_box'><h2>Visibility of user: <i>".$curr_user."</i></h2>\n\n<table><tr>";
+			echo "\n\n<div class='admin_box'><h2>Visibility for user: <i>".$curr_user."</i></h2>\n\n<table><tr>";
 			$j=0;
 		}
 			

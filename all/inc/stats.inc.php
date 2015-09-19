@@ -48,7 +48,11 @@
 			
 			$ua = substr($_SERVER['HTTP_USER_AGENT'], 0, 30);
 
-			if (!file_exists(dirname(CONST_FILE_STATS))) mkdir(dirname(CONST_FILE_STATS));
+			if (!file_exists(dirname(CONST_FILE_STATS)))
+			{
+				mkdir(dirname(CONST_FILE_STATS));
+				file_put_contents(dirname(CONST_FILE_STATS)."/.htaccess", "Deny from all");
+			}
 			if (filesize(CONST_FILE_STATS) > 10000) rename(CONST_FILE_STATS, CONST_FILE_STATS.".old.".date("Ymd-His"));
 			$fh = fopen(CONST_FILE_STATS, 'a') or die("can't open file");
 			fwrite($fh, stripslashes(date("Y-m-d H:i:s")."\t".$_SERVER['REQUEST_URI']."\t".$ip."\t".$_SERVER['REMOTE_USER']."\t$city\t$country\t$isp\t$ua\n"));

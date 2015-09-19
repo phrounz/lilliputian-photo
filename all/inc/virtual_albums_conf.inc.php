@@ -74,8 +74,15 @@ function createNewUser($user)
 
 function createDefaultUserIfNotExists()
 {
-	if (!file_exists(CONST_ALBUM_CONF_DIR)) mkdir(CONST_ALBUM_CONF_DIR);
-	if (!file_exists(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER)) file_put_contents(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER, "", FILE_APPEND);
+	if (!file_exists(CONST_ALBUM_CONF_DIR))
+	{
+		mkdir(CONST_ALBUM_CONF_DIR);
+		file_put_contents(CONST_ALBUM_CONF_DIR."/.htaccess", "Deny from all");
+	}
+	if (!file_exists(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER))
+	{
+		file_put_contents(CONST_ALBUM_CONF_DIR."/".CONST_DEFAULT_USER, "", FILE_APPEND);
+	}
 }
 
 //----------------------------------------------

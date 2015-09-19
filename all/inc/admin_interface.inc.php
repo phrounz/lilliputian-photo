@@ -22,6 +22,12 @@ function doPostOperations()
 		$valbum_array = \VirtualAlbumsConf\listVirtualAlbums();
 		generateAllThumbsAndReducedPictures_($valbum_array);
 	}
+	if (isset($_POST['generate_htaccess']))
+	{
+		$str_pst = 'Generation of <i>.htaccess</i> files';
+		// load list of virtual albums for this user
+		$res = generateAllHtaccess_();
+	}
 	
 	//------------
 	// albums
@@ -145,27 +151,60 @@ function showEdition($valbum_array)
 		."<form action='".getTargetPage()."' method='POST'>You should press this button after modifying albums: "
 		."<input type='submit' value='Generate missing thumbnails' />"
 		."<input type='hidden' name='generate_thumbs' value='true' />"
-		."</form>"
-		."</div>\n\n";
+		."</form>\n\n";
+		
+	echo "\n<h4>Generate <i>.htaccess</i> files</h4>\n" // .htaccess files
+		."<form action='".getTargetPage()."' method='POST'>You should press this button after creating new albums (for security reasons): "
+		."<input type='submit' value='Generate missing .htaccess files' />"
+		."<input type='hidden' name='generate_htaccess' value='true' />"
+		."</form>\n\n";
+	
+	echo "</div>\n\n";
 }
 
 function showStats()
 {	
 	$want_log = (isset($_GET['all_log']) || isset($_GET['last_log']));
 	echo "<div class='admin_box'>\n<h2>Connection log</h2><p><a name='Connection_log'>.</a>"
-		."<a href='?all_log#Connection_log'>All log (might be huge)</a>"
+		."<a href='?all_log#Connection_log'>All logs (might be huge)</a>"
+		."&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?all_log_digest#Connection_log'>All logs digest</a>"
 		."&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?last_log#Connection_log'>Only the last log (between 0 and 10kB)</a>"
 		.($want_log ? "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?#Connection_log'>Close</a>" : "")
 		."</p>";
 		
 	$lines = array();
 	
-	if ($want_log)
+	if (isset($_GET['all_log_digest']))
+	{
+		$nb_lines = 0;
+		$countries_hash = array();
+		$cities_hash = array();
+		$users_hash = array();
+		$last_date = 'None';
+		foreach (glob(CONST_FILE_STATS."*") as $filepath)
+		{
+			foreach (file($filepath) as $line)
+			{
+				$tab = explode("\t", $line);
+				$nb_lines++;
+				$users_hash[$tab[3]] = 1;
+				$cities_hash[$tab[4]] = 1;
+				$countries_hash[$tab[5]] = 1;
+				$last_date = $tab[0];
+			}
+		}
+		echo "Total number of requests: $nb_lines<br />\n"
+			."Last connection date: $last_date<br />\n"
+			."Users: ".implode(',', array_keys($users_hash))."<br />\n"
+			."Countries: ".implode(',', array_keys($countries_hash))."<br />\n"
+			."Cities: ".implode(',', array_keys($cities_hash))."\n";
+	}
+	elseif ($want_log)
 	{
 		echo "<div class='connection_log'>\n"
 			."<table>\n"
 			."<tr style='background-color: #aaaaaa;'><td>Date and time</td><td>Path</td><td>Ip address</td>"
-			."<td>User</td><td>City</td><td>Country</td><td>Internet service provider</td><td>Browser (truncated)</td></tr>";
+			."<td>User</td><td>City</td><td>Country</td><td>Internet service provider</td><td>User-Agent (Browser), truncated</td></tr>";
 		if (isset($_GET['all_log']))
 		{	
 			foreach (glob(CONST_FILE_STATS."*") as $filepath)
@@ -221,6 +260,20 @@ function generateAllThumbsAndReducedPictures_($valbum_array)
 		.'if (media_ids.length > 0){generateThumbnailAjax(media_ids[0], valbum_ids[0]);}else {alert("Ok, nothing to do!");}'."\n"
 		.'</script>'
 		."\n\n";
+}
+
+function generateAllHtaccess_()
+{
+	$res = true;
+	foreach (\MediaAccess\getAllAlbumsDirs() as $album_folder)
+	{
+		$album = basename(strip_tags($album_folder));
+		if (!file_exists("$album_folder/.htaccess"))
+		{
+			$res = (file_put_contents("$album_folder/.htaccess", "Deny from all") != FALSE) && $res;
+		}
+	}
+	return $res;
 }
 
 function getSelectAlbums($name)

@@ -22,7 +22,11 @@
 	
 	function generateThumbnail($media_file, $output_folder, $is_reduced_instead_of_thumb)
 	{
-		if (!file_exists($output_folder)) mkdir($output_folder);
+		if (!file_exists($output_folder)) 
+		{
+			mkdir($output_folder);
+			file_put_contents("$output_folder/.htaccess", "Deny from all");
+		}
 		
 		ini_set('memory_limit', '-1');// Allocate all necessary memory for the image.
 		
