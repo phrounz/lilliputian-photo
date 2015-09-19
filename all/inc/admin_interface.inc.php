@@ -149,6 +149,47 @@ function showEdition($valbum_array)
 		."</div>\n\n";
 }
 
+function showStats()
+{	
+	$want_log = (isset($_GET['all_log']) || isset($_GET['last_log']));
+	echo "<div class='admin_box'>\n<h2>Connection log</h2><p><a name='Connection_log'>.</a>"
+		."<a href='?all_log#Connection_log'>All log (might be huge)</a>"
+		."&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?last_log#Connection_log'>Only the last log (between 0 and 10kB)</a>"
+		.($want_log ? "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?#Connection_log'>Close</a>" : "")
+		."</p>";
+		
+	$lines = array();
+	
+	if ($want_log)
+	{
+		echo "<div class='connection_log'>\n"
+			."<table>\n"
+			."<tr style='background-color: #aaaaaa;'><td>Date and time</td><td>Path</td><td>Ip address</td>"
+			."<td>User</td><td>City</td><td>Country</td><td>Internet service provider</td><td>Browser (truncated)</td></tr>";
+		if (isset($_GET['all_log']))
+		{	
+			foreach (glob(CONST_FILE_STATS."*") as $filepath)
+			{
+				$lines = array_merge($lines, file($filepath));
+			}
+		}
+		elseif (isset($_GET['last_log']))
+		{
+			$lines = array_merge($lines, file(CONST_FILE_STATS));
+		}
+		sort($lines);
+		foreach ($lines as $line)
+		{
+			echo "<tr>";
+			foreach (explode("\t", $line) as $tab) echo "<td>$tab</td>";
+			echo "</tr>\n";
+		}
+		
+		echo "</table></div>";
+	}
+	echo "</div>\n";
+}
+
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------

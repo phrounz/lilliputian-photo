@@ -4,12 +4,15 @@
 	require_once("inc/comments.inc.php");
 	require_once("inc/admin_interface.inc.php");
 	require_once("inc/virtual_albums_conf.inc.php");
+	require_once("inc/stats.inc.php");
 	
 	require_once("inc/show_virtual_album.inc.php");
 	require_once("inc/show_albums_list.inc.php");
 	require_once("inc/show_media_page.inc.php");
 	
 	\VirtualAlbumsConf\createDefaultUserIfNotExists();
+	
+	\Stats\addToStats();
 	
 	// GET parameters
 	$valbum_id = isset($_GET['q']) ? $_GET['q'] : null;
@@ -197,6 +200,7 @@
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 		{
 			AdminInterface\showEdition($valbum_array);
+			AdminInterface\showStats($valbum_array);
 		}
 	}
 ?>

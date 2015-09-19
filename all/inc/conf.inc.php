@@ -9,7 +9,8 @@
 	define('CONST_THUMBNAILS_LARGE_DIR', './thumbnails/large');
 	define('CONST_MAIN_TITLE', 'Photos &amp; videos');
 	// additional security measure but disabled by default because does not work most of the time, depending of your apache configuration:
-	define('CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD', '');
+	define('CONST_HTPASSWD_PATH_TO_CHECK_PASSWORD', '');	
+	define('CONST_FILE_STATS', 'stats/stats.txt');
 	
 	// media page
 	define('CONST_WIDTH_REDUCED_MEDIA', 800);

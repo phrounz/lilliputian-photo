@@ -66,6 +66,25 @@ textarea
 
 /*-------------------------------*/
 
+.connection_log
+{
+	/*overflow:scroll;
+	height: 200px;*/
+	padding: 15px;
+	margin: 15px;
+	background-color: #dddddd;
+}
+
+.connection_log table
+{
+	border-collapse: collapse;
+}
+.connection_log td
+{
+	padding: 10px;
+	border: 1px solid white;
+}
+
 .admin_success_failure_box
 {
 	position: fixed;
