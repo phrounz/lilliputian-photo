@@ -103,8 +103,6 @@ function show($valbum_id, $valbum, $day, $is_insight, $show_ext_dots, $line_retu
 		isset($day) && strcmp($day, $from_date) > 0 ? $day : $from_date, 
 		isset($day) && strcmp($day."ZZZZZZZZZZ", $to_date) < 0 ? $day."ZZZZZZZZZZ" : $to_date, 
 		$valbum['comments_permissions'], 
-		$valbum['exclude_include_list'], 
-		$valbum['is_exclude'], 
 		$is_insight,
 		$show_ext_dots,
 		$line_return_every_or_null);
@@ -114,31 +112,23 @@ function show($valbum_id, $valbum, $day, $is_insight, $show_ext_dots, $line_retu
 // private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-function showVirtualAlbum_(
-	$valbum_id, $album, $from_date, $to_date, $comments_permissions, $exclude_include_list, 
-	$is_exclude, $is_insight, $show_ext_dots, $line_return_every_or_null)
+function showVirtualAlbum_($valbum_id, $album, $from_date, $to_date, $comments_permissions, $is_insight, $show_ext_dots, $line_return_every_or_null)
 {
 	$is_cut = false;
 	$date_media_files = getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, $is_cut);
 	$day_mark = null;
 	
 	$i = 0;
-	$exclude_include_list_array = explode('/', $exclude_include_list);
 	foreach($date_media_files as $media_file => $date_file)
 	{
 		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
 		$day = substr($date_file, 0, 10);
 		$media_id = basename($media_file);
-		
-		$is_in_array = in_array($media_id, $exclude_include_list_array);
-		if ((!$is_exclude && $is_in_array) || ($is_exclude && !$is_in_array))
-		{
-			if (isset($line_return_every_or_null) && $i % $line_return_every_or_null == 0) echo "<br />";
-			showMediaThumb_($valbum_id, $album, $media_id, !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
-			$i++;
-		}
+		if (isset($line_return_every_or_null) && $i % $line_return_every_or_null == 0) echo "<br />";
+		showMediaThumb_($valbum_id, $album, $media_id, !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
+		$i++;
 	}
-	if ($is_cut && $show_ext_dots)
+	if ($is_insight && $show_ext_dots)
 	{
 		echo "<img src='three_dots.png' alt='...' class='three_dots' />";
 	}

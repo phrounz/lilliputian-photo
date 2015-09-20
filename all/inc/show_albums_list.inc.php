@@ -38,17 +38,7 @@ function showListOfAlbums($valbum_array)
 			{
 				echo "Visibility for user: <i>".$curr_user."</i>";
 			}
-			echo "</h2>\n\n";
-			
-			if ($curr_user != CONST_DEFAULT_USER)
-			{
-				echo "<form action='?' method='POST'> "
-					."<input type='submit' value='Delete all specific rights on this user' />"
-					."<input type='hidden' name='valbum_removeuser' value='$curr_user' />"
-					."</form>\n\n";
-			}
-			
-			echo "<table><tr>";
+			echo "</h2>\n\n<table><tr>";
 			$j=0;
 		}
 			
@@ -106,15 +96,8 @@ function showListOfAlbums($valbum_array)
 		{
 			if (\VirtualAlbumsConf\isUserConfEmpty($user))
 			{
-				echo "<div class='admin_box'><h2>Visibility for user: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>";
-				if ($user != CONST_DEFAULT_USER)
-				{
-					echo "<form action='?' method='POST'> "
-						."<input type='submit' value='Delete all specific rights on this user' />"
-						."<input type='hidden' name='valbum_removeuser' value='$user' />"
-						."</form>\n\n";
-				}
-				echo getCreateVirtualAlbumOrGroupButtons_($user)."</div>";
+				echo "<div class='admin_box'><h2>Visibility for user: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>"
+					.getCreateVirtualAlbumOrGroupButtons_($user)."</div>";
 			}
 		}
 	}
@@ -161,25 +144,14 @@ function getCreateVirtualAlbumOrGroupButtons_($curr_user)
 		."<br />allowing visibility on the album ".getSelectAlbums('valbum_add__album')
 		."<br />starting from <input type='text' name='valbum_add__beginning' value='0' /><small> (0 means the beginning of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
 		."<br />until <input type='text' name='valbum_add__end' value='ZZZZZZZZZ' /><small> (ZZZZZZZZZ means the end of the album, otherwise use format YYYY:MM:dd hh:mm:ss)</small>"
-		
 		."<br />and about commenting: <input type='radio' name='valbum_add__comments_permissions' value='NONE'>no access</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='R'>read access</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='RW'>read/write</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='RWD' checked>read/write + delete own comments</input> - "
 		."<input type='radio' name='valbum_add__comments_permissions' value='RWDA'>read/write + delete all comments</input>"
-		
 		."<br />With main thumbnail picture: <input type='text' name='valbum_add__album_thumb_picture' value='' /> "
 		."<small>(example: <i>IMG1234.jpg</i>, look in the album for name) (let blank for automatic pictures combination) "
 		."(you can put several pictures, separated by \"/\", for random selection)</small>"
-		
-		."<br />Exclude/include list: <input type='text' name='valbum_add__exclude_include_list' value='' /> "
-		."<small>(example: <i>IMG1234.jpg</i>, look in the album for name)"
-		."(you can put several pictures, separated by \"/\", for random selection)</small>"
-		
-		."<input type='radio' name='valbum_add__is_exclude' value='0' />include list"
-		."<input type='radio' name='valbum_add__is_exclude' value='1' checked />exclude list"
-		." <small>(let blank with exclude checked to keep all media files)</small>"
-		
 		."<br /><input type='submit' value='Add virtual album' />\n"
 		."</form></div>\n"
 

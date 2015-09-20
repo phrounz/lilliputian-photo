@@ -26,8 +26,6 @@ function listVirtualAlbums()
 					'album' => $alb,
 					'from_date' => null,
 					'to_date' => null,
-					'exclude_include_list' => '',
-					'is_exclude' => true,
 					'comments_permissions' => 'RWDA',
 					'user' => CONST_ADMIN_USER));
 		}
@@ -53,16 +51,9 @@ function listVirtualAlbums()
 
 //----------------------------------------------
 
-function createVirtualAlbum($title, $album, $from_date, $to_date, $comments_permissions, $user, $album_thumb_picture, $valbum_add__exclude_include_list, $valbum_add__is_exclude)
+function createVirtualAlbum($title, $album, $from_date, $to_date, $comments_permissions, $user, $album_thumb_picture)
 {
-	preg_replace('/[^\.a-zA-Z0-9_-]/s', '', $album_thumb_picture);
-	preg_replace('/[^\.a-zA-Z0-9_-]/s', '', $valbum_add__exclude_include_list);
-	preg_replace('/[^\.a-zA-Z0-9_-]/s', '', $valbum_add__is_exclude);
-	$is_exclude = (((int)$valbum_add__is_exclude) ? 1 : 0);
-	
-	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", 
-		"ALBUM|$title|$album|$from_date|$to_date|$comments_permissions|$album_thumb_picture|$valbum_add__exclude_include_list|$is_exclude\n"
-		, FILE_APPEND) !== FALSE;
+	return file_put_contents(CONST_ALBUM_CONF_DIR."/$user", "ALBUM|$title|$album|$from_date|$to_date|$comments_permissions|$album_thumb_picture\n", FILE_APPEND) !== FALSE;
 }
 
 //----------------------------------------------
@@ -243,9 +234,7 @@ function readVirtualAlbumConfFile($album_conf_file)
 							'to_date' => $data[4], 
 							'comments_permissions' => $data[5],
 							'user' => $user,
-							'album_thumb_picture' => $data[6],
-							'exclude_include_list' => $data[7],
-							'is_exclude' => ($data[8] ? true : false)
+							'album_thumb_picture' => $data[6]
 							));
 				}
 				else if ($data[0] == 'GROUP_TITLE') // add a title for a group of virtual albums

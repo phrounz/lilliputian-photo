@@ -72,9 +72,7 @@ function doPostOperations()
 			$_POST['valbum_add__end'], 
 			$_POST['valbum_add__comments_permissions'], 
 			$_POST['valbum_add__user'],
-			$_POST['valbum_add__album_thumb_picture'],
-			$_POST['valbum_add__exclude_include_list'],
-			$_POST['valbum_add__is_exclude']);
+			$_POST['valbum_add__album_thumb_picture']);
 	}
 	else if (isset($_POST['valbum_add__type']) && $_POST['valbum_add__type']=='GROUP_TITLE')
 	{
@@ -117,12 +115,12 @@ function showEdition($valbum_array)
 		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
 		."<p>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
 		
-	/*$removable_users_opts = getSelectUsers('valbum_removeuser', true);
+	$removable_users_opts = getSelectUsers('valbum_removeuser', true);
 	if (strlen($removable_users_opts) > 0)
 	{
 		echo "<p>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</p>";
 		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
-	}*/
+	}
 	echo "</div>\n";
 	
 	//----------------------------
