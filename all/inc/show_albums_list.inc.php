@@ -174,7 +174,7 @@ function getCreateVirtualAlbumOrGroupButtons_($curr_user)
 		
 		."<br />Exclude/include list: <input type='text' name='valbum_add__exclude_include_list' value='' /> "
 		."<small>(example: <i>IMG1234.jpg</i>, look in the album for name)"
-		."(you can put several pictures, separated by \"/\", for random selection)</small>"
+		."(you can put several pictures, separated by \"/\")</small>"
 		
 		."<input type='radio' name='valbum_add__is_exclude' value='0' />include list"
 		."<input type='radio' name='valbum_add__is_exclude' value='1' checked />exclude list"
