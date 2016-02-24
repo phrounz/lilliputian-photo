@@ -19,8 +19,8 @@ function doPostOperations()
 	if (isset($_POST['generate_thumbs']))
 	{
 		// load list of virtual albums for this user
-		$valbum_array = \VirtualAlbumsConf\listVirtualAlbums();
-		generateAllThumbsAndReducedPictures_($valbum_array);
+		echo "\n".'<script type="text/javascript" src="ajax.js"></script>'."\n";
+		echo "\n<script type='text/javascript'>window.onload = generateThumbnailAjaxGenerator;</script>\n\n";
 	}
 	if (isset($_POST['generate_htaccess']))
 	{
@@ -234,35 +234,6 @@ function showStats()
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
-
-function generateAllThumbsAndReducedPictures_($valbum_array)
-{
-	echo "\n"
-		.'<script type="text/javascript" src="ajax.js"></script>'."\n"
-		.'<script type="text/javascript">'."\n";
-		
-	foreach ($valbum_array as $valbum_id => $valbum)
-	{
-		if (isset($valbum) && $valbum['type'] == 'ALBUM' && $valbum['user'] == CONST_ADMIN_USER)
-		{
-			$album = $valbum['album'];
-			$is_cut = false;
-			foreach (\ShowVirtualAlbum\getListOfDatePerMedias($album, $valbum["from_date"], $valbum["to_date"], false, $is_cut) as $media_file => $date)
-			{
-				$media_id = basename($media_file);
-						
-				if (!file_exists(\MediaAccess\getRealSmallThumbFromMedia($album, $media_id)) || !file_exists(\MediaAccess\getRealLargeThumbFromMedia($album, $media_id)))
-				{
-					echo 'media_ids.push("'.$media_id.'");valbum_ids.push("'.$valbum_id.'");'."\n";
-				}
-			}
-		}
-	}
-	echo "\n"
-		.'if (media_ids.length > 0){generateThumbnailAjax(media_ids[0], valbum_ids[0]);}else {alert("Ok, nothing to do!");}'."\n"
-		.'</script>'
-		."\n\n";
-}
 
 function generateAllHtaccess_()
 {
