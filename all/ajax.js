@@ -15,7 +15,12 @@ function generateThumbnailAjaxGenerator() {
 		if(xhr.readyState === 4) { // if request done
 			if(xhr.status === 200) { // if success
 				eval(xhr.responseText);
-				if (media_ids.length > 0){generateThumbnailAjax_(media_ids[0], valbum_ids[0]);}else {alert("Ok, nothing to do!");}
+				if (media_ids.length > 0) {
+					generateThumbnailAjax_(media_ids[0], valbum_ids[0]);
+				} else {
+					alert("Ok, nothing to do!");
+					window.location="?";
+				}
 			} else {
 				alert('Error: '+xhr.status); // if error
 			}

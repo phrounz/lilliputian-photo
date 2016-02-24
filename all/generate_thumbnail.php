@@ -3,6 +3,8 @@
 	require_once("inc/virtual_albums_conf.inc.php");
 	require_once("inc/media_access.inc.php");
 	
+	if ($_SERVER['REMOTE_USER'] != CONST_ADMIN_USER) exit(1);
+	
 	// GET arguments
 	if (!isset($_GET['valbum_id']) || !isset($_GET['media_id'])) die("missing arg");
 	$valbum_id = $_GET['valbum_id'];
