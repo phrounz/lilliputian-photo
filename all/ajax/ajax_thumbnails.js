@@ -9,7 +9,7 @@ function generateThumbnailAjaxGenerator() {
 		"<h2 class='fullscreen_overlay'><br />...Please wait, getting list (this may take some minutes)...</h2>";
 	 
 	var xhr=new XMLHttpRequest();
-	xhr.open('get', 'generate_thumbnail_js.php');
+	xhr.open('get', 'ajax/ajax_thumbnails.php');
 	
 	xhr.onreadystatechange=function(){
 		if(xhr.readyState === 4) { // if request done
@@ -34,7 +34,7 @@ function generateThumbnailAjaxGenerator() {
 
 function generateThumbnailAjax_(file_to_process, valbum_id) {
 	var xhr=new XMLHttpRequest();
-	xhr.open('get', 'generate_thumbnail.php?valbum_id='+valbum_id+'&media_id='+file_to_process);
+	xhr.open('get', 'ajax/generate_thumbnail.php?valbum_id='+valbum_id+'&media_id='+file_to_process);
 	 
 	xhr.onreadystatechange=function(){
 		if(xhr.readyState === 4) { // if request done

@@ -19,7 +19,7 @@ function doPostOperations()
 	if (isset($_POST['generate_thumbs']))
 	{
 		// load list of virtual albums for this user
-		echo "\n".'<script type="text/javascript" src="ajax.js"></script>'."\n";
+		echo "\n".'<script type="text/javascript" src="ajax/ajax_thumbnails.js"></script>'."\n";
 		echo "\n<script type='text/javascript'>window.onload = generateThumbnailAjaxGenerator;</script>\n\n";
 	}
 	if (isset($_POST['generate_htaccess']))

@@ -83,7 +83,7 @@
 </head>
 <body>
 
-	<script type="text/javascript" src="ajax_get_day.js"></script>
+	<script type="text/javascript" src="ajax/ajax_get_day.js"></script>
 	
 	<div class='header'>
 		<table>

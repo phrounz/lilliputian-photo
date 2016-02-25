@@ -1,5 +1,6 @@
 .. image:: https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/all/logo.png
-It started as a personal need to share my photographies and videos, in order to replace Google+. See also other stuff my `web site <http://www.volatiledove.com>`_.
+It started as a personal need to share my photographies and videos, in order to replace Google+. I currently use it for more than 20000 pictures and videos across around 50 albums, and it still works well.
+See also other stuff my `web site <http://www.volatiledove.com>`_.
 
 Everything is made by me, except the code of thumbnail image generation based on code by zubrag.com (see `here <http://www.zubrag.com/scripts/website-thumbnail-generator.php>`_ and  `here <http://www.zubrag.com/forum/index.php/board,13.0.html>`_).
 

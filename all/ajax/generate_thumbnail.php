@@ -1,7 +1,9 @@
 <?php
-	require_once("inc/conf.inc.php");
-	require_once("inc/virtual_albums_conf.inc.php");
-	require_once("inc/media_access.inc.php");
+	require_once("../inc/conf.inc.php");
+	require_once("../inc/virtual_albums_conf.inc.php");
+	require_once("../inc/media_access.inc.php");
+	
+	chdir("..");// change directory to the same than index.php before going further
 	
 	if ($_SERVER['REMOTE_USER'] != CONST_ADMIN_USER) exit(1);
 	
