@@ -26,8 +26,10 @@ function showListOfAlbums($valbum_array)
 	{
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $valbum['user'] != $curr_user)
 		{
-			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n"
-				."\n\n<div class='admin_box'><h2>";
+			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n\n";
+			$is_collapsed = isset($_GET['collapse_virtual_album_list']);
+			if ($curr_user == CONST_ADMIN_USER) echo '</div><div id="collapsable_virtual_albums_list" style="display: '.($is_collapsed?'block':'none').';">'."\n";
+			echo "\n<div class='admin_box'><h2>";
 			$curr_user=$valbum['user'];
 			if ($curr_user == CONST_DEFAULT_USER)
 			{
@@ -42,7 +44,7 @@ function showListOfAlbums($valbum_array)
 			
 			if ($curr_user != CONST_DEFAULT_USER)
 			{
-				echo "<form action='?' method='POST'> "
+				echo "<form action='?collapse_virtual_album_list' method='POST'> "
 					."<input type='submit' value='Delete all specific rights on this user' />"
 					."<input type='hidden' name='valbum_removeuser' value='$curr_user' />"
 					."</form>\n\n";
@@ -51,7 +53,7 @@ function showListOfAlbums($valbum_array)
 			echo "<table><tr>";
 			$j=0;
 		}
-			
+		
 		if ($valbum['type'] == 'GROUP_TITLE')
 		{
 			echo "</tr>\n<tr><td class='group'><h2>".$valbum["title"]."</h2>".getDeleteAndReorderButtons_($curr_user, $valbum["title"])."</td></tr>\n<tr>";
@@ -109,7 +111,7 @@ function showListOfAlbums($valbum_array)
 				echo "<div class='admin_box'><h2>Visibility for user: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>";
 				if ($user != CONST_DEFAULT_USER)
 				{
-					echo "<form action='?' method='POST'> "
+					echo "<form action='?collapse_virtual_album_list' method='POST'> "
 						."<input type='submit' value='Delete all specific rights on this user' />"
 						."<input type='hidden' name='valbum_removeuser' value='$user' />"
 						."</form>\n\n";
@@ -129,7 +131,7 @@ function getDeleteAndReorderButtons_($curr_user, $album_title)
 	$str = '';//"<a name='$album_title"."_____$curr_user'></a>";
 	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $curr_user != CONST_ADMIN_USER)
 	{
-		$str .= "<small><form action='?' method='POST'>\n"
+		$str .= "<small><form action='?collapse_virtual_album_list' method='POST'>\n"
 			."Reorder: <input type='hidden' name='valbum_reorder__user' value='$curr_user' />"
 			."<select name='valbum_reorder__action'>\n"
 			."  <option>MoveTop</option>\n"
@@ -142,7 +144,7 @@ function getDeleteAndReorderButtons_($curr_user, $album_title)
 			."<input type='submit' value='Reorder' /></select>"
 			."</form></small>\n"
 			
-			."<small><form action='?' method='POST'>\n"
+			."<small><form action='?collapse_virtual_album_list' method='POST'>\n"
 			."Delete: <input type='hidden' name='valbum_removal__user' value='$curr_user' />"
 			."<input type='hidden' name='valbum_removal__title' value='$album_title' />"
 			."<input type='submit' value='Delete!' /></select>"
@@ -155,7 +157,7 @@ function getCreateVirtualAlbumOrGroupButtons_($curr_user)
 {
 	if ($curr_user == CONST_ADMIN_USER) return '';
 	return "\n<div class='admin_grey_box'>"
-		."<form action='?' method='POST'><input type='hidden' name='valbum_add__type' value='ALBUM' />\n"
+		."<form action='?collapse_virtual_album_list' method='POST'><input type='hidden' name='valbum_add__type' value='ALBUM' />\n"
 		."Create a new <b>virtual album</b> named <input type='text' name='valbum_add__title' value='' />"
 		."<input type='hidden' name='valbum_add__user' value='$curr_user' />"
 		."<br />allowing visibility on the album ".getSelectAlbums('valbum_add__album')
@@ -183,7 +185,7 @@ function getCreateVirtualAlbumOrGroupButtons_($curr_user)
 		."<br /><input type='submit' value='Add virtual album' />\n"
 		."</form></div>\n"
 
-		."<div class='admin_grey_box'><form action='?' method='POST'><input type='hidden' name='valbum_add__type' value='GROUP_TITLE' />\n"
+		."<div class='admin_grey_box'><form action='?collapse_virtual_album_list' method='POST'><input type='hidden' name='valbum_add__type' value='GROUP_TITLE' />\n"
 		."Create a new <b>group title</b> named <input type='text' name='valbum_add__title' value='' /> "
 		."<input type='hidden' name='valbum_add__user' value='$curr_user' />"
 		."<input type='submit' value='Add group title' />\n"

@@ -107,7 +107,7 @@ function doPostOperations()
 
 //----------------------------------------------
 
-function showEdition($valbum_array)
+function showAdminVisibilitySpecificUser()
 {
 	//----------------------------
 	// Create a new user
@@ -124,7 +124,10 @@ function showEdition($valbum_array)
 		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
 	}*/
 	echo "</div>\n";
-	
+}
+
+function showAdminAlbumManagement()
+{
 	//----------------------------
 	// Album management
 	
@@ -167,11 +170,11 @@ function showEdition($valbum_array)
 function showStats()
 {	
 	$want_log = (isset($_GET['all_log']) || isset($_GET['last_log']));
-	echo "<div class='admin_box'>\n<h2>Connection log</h2><p><a name='Connection_log'>.</a>"
-		."<a href='?all_log#Connection_log'>All logs (might be huge)</a>"
-		."&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?all_log_digest#Connection_log'>All logs digest</a>"
-		."&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?last_log#Connection_log'>Only the last log (between 0 and 10kB)</a>"
-		.($want_log ? "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;&nbsp;<a href='?#Connection_log'>Close</a>" : "")
+	echo "<div class='admin_box'>\n<h2>Connection log</h2><p>"
+		."<span class='button_top'><a href='?all_log&amp;collapse_stats'>All logs (might be huge)</a></span>"
+		."<span class='button_top'><a href='?all_log_digest&amp;collapse_stats'>All logs digest</a></span>"
+		."<span class='button_top'><a href='?last_log&amp;collapse_stats'>Only the last log (between 0 and 10kB)</a></span>"
+		.($want_log ? "<span class='button_top'><a href='?collapse_stats'>Close</a></span>" : "")
 		."</p>";
 		
 	$lines = array();
@@ -195,7 +198,7 @@ function showStats()
 				$last_date = $tab[0];
 			}
 		}
-		echo "Total number of requests: $nb_lines<br />\n"
+		echo "<br /><br /><br />Total number of requests: $nb_lines<br />\n"
 			."Last connection date: $last_date<br />\n"
 			."Users: ".implode(',', array_keys($users_hash))."<br />\n"
 			."Countries: ".implode(',', array_keys($countries_hash))."<br />\n"
@@ -274,7 +277,7 @@ function htmlMiniForm($html, $submit_button_caption)
 	return "<form action='".getTargetPage()."' method='POST'>\n$html\n<input type='submit' value='$submit_button_caption' />\n</form>\n";
 }
 
-function getTargetPage() { return '?'; }
+function getTargetPage() { return '?collapse_list_of_albums'; }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------------

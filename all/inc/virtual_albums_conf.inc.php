@@ -165,40 +165,51 @@ function reorderVirtualAlbumOrTitle($title, $user, $action)
 		}
 		if ($line[1] == $title)
 		{
-			if ($action == 'MoveTop' && $i>0)
+			if ($action == 'MoveTop')
 			{
-				$out = array_splice($lines, $i, 1);
-				array_splice($lines, 0, 0, $out);
-				break;
+				if ($i>0)
+				{
+					$out = array_splice($lines, $i, 1);
+					array_splice($lines, 0, 0, $out);
+				}
 			}
-			elseif ($action == 'MoveBeginningGroup' && $i>0)
+			elseif ($action == 'MoveBeginningGroup')
 			{
-				$out = array_splice($lines, $i, 1);
-				array_splice($lines, $current_group_index+1, 0, $out);
-				break;
+				if ($i>0)
+				{
+					$out = array_splice($lines, $i, 1);
+					array_splice($lines, $current_group_index+1, 0, $out);
+				}
 			}
-			elseif ($action == 'MoveUp' && $i>0)
+			elseif ($action == 'MoveUp')
 			{
-				$out = array_splice($lines, $i, 1);
-				array_splice($lines, $i-1, 0, $out);
-				break;
+				if ($i>0)
+				{
+					$out = array_splice($lines, $i, 1);
+					array_splice($lines, $i-1, 0, $out);
+				}
 			}
-			elseif ($action == 'MoveDown' && $i<count($lines))
+			elseif ($action == 'MoveDown')
 			{
-				$out = array_splice($lines, $i, 1);
-				array_splice($lines, $i+1, 0, $out);
-				break;
+				if ($i<count($lines))
+				{
+					$out = array_splice($lines, $i, 1);
+					array_splice($lines, $i+1, 0, $out);
+				}
 			}
-			elseif ($action == 'MoveBottom' && $i<count($lines))
+			elseif ($action == 'MoveBottom')
 			{
-				$out = array_splice($lines, $i, 1);
-				array_splice($lines, count($lines), 0, $out);
-				break;
+				if ($i<count($lines))
+				{
+					$out = array_splice($lines, $i, 1);
+					array_splice($lines, count($lines), 0, $out);
+				}
 			}
 			else
 			{
 				print_r("ERROR: $action unknown");
 			}
+			break;
 		}
 		$i++;
 	}

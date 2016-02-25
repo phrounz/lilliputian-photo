@@ -91,7 +91,7 @@ textarea
 	left: 100px;
 	top: 30px;
 	width: 600px;
-	height: 50px;
+	height: 80px;
 	padding: 15px;
 	background:rgba(255,255,255,0.8);
 	border: 1px solid black;
@@ -99,6 +99,7 @@ textarea
 
 .admin_box
 {
+	margin-top: 50px;
 	margin-bottom: 30px;
 	/*border-left: 15px solid #bbbbbb;*/
 	border-top: 1px solid black;
@@ -173,6 +174,19 @@ a .insight_video {
 
 a:hover .insight_video {
 }
+
+.button_top {
+	padding: 20px;
+	margin: 20px;
+	border: 1px solid black;
+	margin-bottom: 50px;
+}
+
+.button_top:hover {
+    background-color: #aaaaaa;
+	cursor: pointer;
+	margin-bottom: 50px;
+} 
 
 /*-------------------------------*/
 

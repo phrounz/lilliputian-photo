@@ -196,11 +196,40 @@
 	// list of albums page
 	else
 	{
-		ShowAlbumsList\showListOfAlbums($valbum_array);
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 		{
-			AdminInterface\showEdition($valbum_array);
-			AdminInterface\showStats($valbum_array);
+			echo '
+			<div>
+				<script type="text/javascript">
+					function displayOnly(id)
+					{
+						document.getElementById("collapsable_list_of_albums").style.display="none";
+						document.getElementById("collapsable_virtual_albums_list").style.display="none";
+						document.getElementById("collapsable_stats").style.display="none";
+						document.getElementById(id).style.display="block";
+					}
+				</script>
+				<span class="button_top" onclick=\'displayOnly("collapsable_list_of_albums");\'>Albums</span>
+				<span class="button_top" onclick=\'displayOnly("collapsable_virtual_albums_list");\'>Visibility</span>
+				<span class="button_top" onclick=\'displayOnly("collapsable_stats");\'>Connection log</span>
+			</div>';
+			$is_collapsed = isset($_GET['collapse_list_of_albums']);
+			echo '<div id="collapsable_list_of_albums" style="display: '.($is_collapsed?'block':'none').';">';
+			AdminInterface\showAdminAlbumManagement();
+			ShowAlbumsList\showListOfAlbums($valbum_array);
+			AdminInterface\showAdminVisibilitySpecificUser();
+			echo '</div>';
+			if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
+			{
+				$is_collapsed2 = isset($_GET['collapse_stats']);
+				echo '<div id="collapsable_stats" style="display: '.($is_collapsed2?'block':'none').';">';
+				AdminInterface\showStats($valbum_array);
+				echo '</div>';
+			}
+		}
+		else
+		{
+			ShowAlbumsList\showListOfAlbums($valbum_array);
 		}
 	}
 ?>
