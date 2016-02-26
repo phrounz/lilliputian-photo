@@ -111,11 +111,12 @@ function showAdminVisibilitySpecificUser()
 {
 	//----------------------------
 	// Create a new user
-	echo "\n<div class='admin_box'>\n<h2>Visibility for a specific user</h2>\n"
+	echo "\n<div class='admin_box'>\n";
+	//echo "<h2>Visibility for a specific user</h2>\n"
 		
-		//."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p>"
-		//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
-		."<p>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
+	//."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p>"
+	//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
+	echo "<p>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
 		
 	/*$removable_users_opts = getSelectUsers('valbum_removeuser', true);
 	if (strlen($removable_users_opts) > 0)
@@ -131,8 +132,9 @@ function showAdminAlbumManagement()
 	//----------------------------
 	// Album management
 	
-	echo "\n<div class='admin_box'>\n<h2>Album management</h2>\n"
-	
+	echo "\n<div class='admin_box'>\n";
+	//echo "<h2>Album management</h2>\n"
+	echo ""
 		."<h4>Manage media files</h4>"
 		
 		."<p>It's advised to upload the albums manually (with an FTP client, for example) instead of using the buttons below, it's more practical to upload <i>en masse</i>.</p><ul>\n"
@@ -169,69 +171,26 @@ function showAdminAlbumManagement()
 
 function showStats()
 {	
-	$want_log = (isset($_GET['all_log']) || isset($_GET['last_log']));
-	echo "<div class='admin_box'>\n<h2>Connection log</h2><p>"
-		."<span class='button_top'><a href='?all_log&amp;collapse_stats'>All logs (might be huge)</a></span>"
-		."<span class='button_top'><a href='?all_log_digest&amp;collapse_stats'>All logs digest</a></span>"
-		."<span class='button_top'><a href='?last_log&amp;collapse_stats'>Only the last log (between 0 and 10kB)</a></span>"
-		.($want_log ? "<span class='button_top'><a href='?collapse_stats'>Close</a></span>" : "")
-		."</p>";
+	echo '<script type="text/javascript" src="ajax/ajax_get_stats.js"></script>'."\n";
+	echo '<div class= "admin_box">
+		<p>
+			<script type="text/javascript">
+				function loadOnly(id)
+				{
+					document.getElementById("_all_log").style.backgroundColor="inherit";
+					document.getElementById("_all_log_digest").style.backgroundColor="inherit";
+					document.getElementById("_last_log").style.backgroundColor="inherit";
+					document.getElementById("_"+id).style.backgroundColor="#cccccc";
+					loadStats(id);
+				}
+			</script>
+			<span class="button_top" id="_all_log" onclick=\'loadOnly("all_log");\'>All logs (might be huge)</span>
+			<span class="button_top" id="_all_log_digest" onclick=\'loadOnly("all_log_digest");\'>All logs digest</span>
+			<span class="button_top" id="_last_log" onclick=\'loadOnly("last_log");\'>Only the last log (between 0 and 10kB)</span>
+		</p>
+		';//.($want_log ? "<span class='button_top'><a href='?collapse_stats'>Close</a></span>" : "")
 		
-	$lines = array();
-	
-	if (isset($_GET['all_log_digest']))
-	{
-		$nb_lines = 0;
-		$countries_hash = array();
-		$cities_hash = array();
-		$users_hash = array();
-		$last_date = 'None';
-		foreach (glob(CONST_FILE_STATS."*") as $filepath)
-		{
-			foreach (file($filepath) as $line)
-			{
-				$tab = explode("\t", $line);
-				$nb_lines++;
-				$users_hash[$tab[3]] = 1;
-				$cities_hash[$tab[4]] = 1;
-				$countries_hash[$tab[5]] = 1;
-				$last_date = $tab[0];
-			}
-		}
-		echo "<br /><br /><br />Total number of requests: $nb_lines<br />\n"
-			."Last connection date: $last_date<br />\n"
-			."Users: ".implode(',', array_keys($users_hash))."<br />\n"
-			."Countries: ".implode(',', array_keys($countries_hash))."<br />\n"
-			."Cities: ".implode(',', array_keys($cities_hash))."\n";
-	}
-	elseif ($want_log)
-	{
-		echo "<div class='connection_log'>\n"
-			."<table>\n"
-			."<tr style='background-color: #aaaaaa;'><td>Date and time</td><td>Path</td><td>Ip address</td>"
-			."<td>User</td><td>City</td><td>Country</td><td>Internet service provider</td><td>User-Agent (Browser), truncated</td></tr>";
-		if (isset($_GET['all_log']))
-		{	
-			foreach (glob(CONST_FILE_STATS."*") as $filepath)
-			{
-				$lines = array_merge($lines, file($filepath));
-			}
-		}
-		elseif (isset($_GET['last_log']))
-		{
-			$lines = array_merge($lines, file(CONST_FILE_STATS));
-		}
-		sort($lines);
-		foreach ($lines as $line)
-		{
-			echo "<tr>";
-			foreach (explode("\t", $line) as $tab) echo "<td>$tab</td>";
-			echo "</tr>\n";
-		}
-		
-		echo "</table></div>";
-	}
-	echo "</div>\n";
+	echo "<div id='stats'></div>\n";
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------

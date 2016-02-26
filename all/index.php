@@ -203,21 +203,47 @@
 				<script type="text/javascript">
 					function displayOnly(id)
 					{
-						document.getElementById("collapsable_list_of_albums").style.display="none";
-						document.getElementById("collapsable_virtual_albums_list").style.display="none";
-						document.getElementById("collapsable_stats").style.display="none";
+						var coll = [
+							"collapsable_list_of_albums", 
+							"collapsable_album_management", 
+							"collapsable_virtual_albums_list", 
+							"collapsable_visibility_add_user", 
+							"collapsable_stats"];
+						coll.forEach(function(entry) {
+							document.getElementById("_"+entry).style.backgroundColor="inherit";
+							document.getElementById(entry).style.display="none";
+						});
 						document.getElementById(id).style.display="block";
+						document.getElementById("_"+id).style.backgroundColor="#cccccc";
 					}
 				</script>
-				<span class="button_top" onclick=\'displayOnly("collapsable_list_of_albums");\'>Albums</span>
-				<span class="button_top" onclick=\'displayOnly("collapsable_virtual_albums_list");\'>Visibility</span>
-				<span class="button_top" onclick=\'displayOnly("collapsable_stats");\'>Connection log</span>
+				<span class="button_top" id="_collapsable_list_of_albums" onclick=\'displayOnly("collapsable_list_of_albums");\'>Albums</span>
+				<span class="button_top" id="_collapsable_album_management" onclick=\'displayOnly("collapsable_album_management");\'>Albums management</span>
+				<span class="button_top" id="_collapsable_virtual_albums_list" onclick=\'displayOnly("collapsable_virtual_albums_list");\'>Visibility</span>
+				<span class="button_top" id="_collapsable_visibility_add_user" onclick=\'displayOnly("collapsable_visibility_add_user");\'>Add user for visibility</span>
+				<span class="button_top" id="_collapsable_stats" onclick=\'displayOnly("collapsable_stats");\'>Connection log</span>
 			</div>';
+			
 			$is_collapsed = isset($_GET['collapse_list_of_albums']);
 			echo '<div id="collapsable_list_of_albums" style="display: '.($is_collapsed?'block':'none').';">';
+			ShowAlbumsList\showListOfAlbums($valbum_array, true);
+			echo "</div>\n\n";
+
+			$is_collapsed = isset($_GET['collapsable_album_management']);
+			echo '<div id="collapsable_album_management" style="display: '.($is_collapsed?'block':'none').';">';
 			AdminInterface\showAdminAlbumManagement();
-			ShowAlbumsList\showListOfAlbums($valbum_array);
+			echo "</div>\n\n";
+			
+			$is_collapsed = isset($_GET['collapse_virtual_album_list']);
+			echo '<div id="collapsable_virtual_albums_list" style="display: '.($is_collapsed?'block':'none').';">';
+			ShowAlbumsList\showListOfAlbums($valbum_array, false);
+			echo "</div>\n\n";
+			
+			$is_collapsed = isset($_GET['collapsable_visibility_add_user']);
+			echo '<div id="collapsable_visibility_add_user" style="display: '.($is_collapsed?'block':'none').';">';
 			AdminInterface\showAdminVisibilitySpecificUser();
+			echo "</div>\n\n";
+			
 			echo '</div>';
 			if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 			{
@@ -229,7 +255,7 @@
 		}
 		else
 		{
-			ShowAlbumsList\showListOfAlbums($valbum_array);
+			ShowAlbumsList\showListOfAlbums($valbum_array, false);
 		}
 	}
 ?>

@@ -9,40 +9,61 @@
 // public functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
-function showListOfAlbums($valbum_array)
+function showListOfAlbums($valbum_array, $display_albums_and_not_virtual_albums)
 {
-	$curr_user = $_SERVER['REMOTE_USER'];
-	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
-	{
-		echo "\n<div class='admin_box'>\n"
-			."<h2>Albums</h2>\n"
-			."<p>An album is a subfolder of the <i>albums/</i> directory. As the administrator, you can see them all.</p>\n";
-	}
-		
-	echo "<table><tr>\n";
-	$j=0;
+	//-------------------------
+	// reorganize into $array_of_valbum_array
 	
+	$array_of_valbum_array = array();
+	
+	$curr_user = null;
+	
+	$valbum_array_part = array();
 	foreach ($valbum_array as $valbum_id => $valbum)
 	{
+		if (!isset($curr_user)) $curr_user = $valbum['user'];
 		if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $valbum['user'] != $curr_user)
 		{
-			echo "</tr></table>\n".getCreateVirtualAlbumOrGroupButtons_($curr_user)."</div>\n\n";
-			$is_collapsed = isset($_GET['collapse_virtual_album_list']);
-			if ($curr_user == CONST_ADMIN_USER) echo '</div><div id="collapsable_virtual_albums_list" style="display: '.($is_collapsed?'block':'none').';">'."\n";
-			echo "\n<div class='admin_box'><h2>";
-			$curr_user=$valbum['user'];
-			if ($curr_user == CONST_DEFAULT_USER)
+			array_push($array_of_valbum_array, $valbum_array_part);
+			$valbum_array_part = array();
+			$curr_user = $valbum['user'];
+		}
+		$valbum_array_part[$valbum_id] = $valbum;
+	}
+	array_push($array_of_valbum_array, $valbum_array_part);
+	$j=0;
+	
+	//-------------------------
+	// display lists of albums
+	
+	foreach ($array_of_valbum_array as $valbum_array)
+	{
+		$curr_user = array_values($valbum_array)[0]['user'];
+		
+		if ((($curr_user == CONST_ADMIN_USER) && $display_albums_and_not_virtual_albums) || (($curr_user != CONST_ADMIN_USER) && !$display_albums_and_not_virtual_albums))
+		{
+			echo "\n\n<!-- new album list -->\n"
+				.'<div class="admin_box">';
+			
+			if ($curr_user == CONST_ADMIN_USER)
+			{
+				//echo "<h2>Albums</h2>";
+			}
+			elseif ($curr_user == CONST_DEFAULT_USER)
 			{
 				$other_users = \VirtualAlbumsConf\getUsers(true);
-				echo "Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '');
+				echo "<h2>Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '')."</h2>";
 			}
 			else
 			{
-				echo "Visibility for user: <i>".$curr_user."</i>";
+				echo "<h2>Visibility for user: <i>".$curr_user."</i></h2>";
 			}
-			echo "</h2>\n\n";
-			
-			if ($curr_user != CONST_DEFAULT_USER)
+			echo "\n\n";
+			if ($curr_user == CONST_ADMIN_USER)
+			{
+				echo "<p>An album is a subfolder of the <i>albums/</i> directory. As the administrator, you can see them all.</p>\n";
+			}
+			elseif ($curr_user != CONST_DEFAULT_USER)
 			{
 				echo "<form action='?collapse_virtual_album_list' method='POST'> "
 					."<input type='submit' value='Delete all specific rights on this user' />"
@@ -51,59 +72,63 @@ function showListOfAlbums($valbum_array)
 			}
 			
 			echo "<table><tr>";
-			$j=0;
-		}
-		
-		if ($valbum['type'] == 'GROUP_TITLE')
-		{
-			echo "</tr>\n<tr><td class='group'><h2>".$valbum["title"]."</h2>".getDeleteAndReorderButtons_($curr_user, $valbum["title"])."</td></tr>\n<tr>";
-			$j=0;
-		}
-		else if ($valbum['type'] == 'ALBUM')
-		{
-			$album_title = $valbum['title'];
 			
-			echo "\n<td><div class='alb_insight'><a href='".\MediaAccess\getAlbumUrl($valbum_id)."'>\n"
-				."  <span>";// - ".count($media_files_this_album)." elements
-			
-			if (isset($valbum["album_thumb_picture"]) && $valbum["album_thumb_picture"]!='')
+			foreach ($valbum_array as $valbum_id => $valbum)
 			{
-				$pic = $valbum["album_thumb_picture"];
-				if (strstr($pic, '/'))
+				if ($valbum['type'] == 'GROUP_TITLE')
 				{
-					$array_pics = explode('/', $valbum["album_thumb_picture"]);
-					$pic = $array_pics[array_rand($array_pics, 1)];
+					echo "</tr>\n<tr><td class='group'><h2>".$valbum["title"]."</h2>".getDeleteAndReorderButtons_($curr_user, $valbum["title"])."</td></tr>\n<tr>";
+					$j=0;
 				}
-				echo "    <img class='album_thumb_picture' src='".(\MediaAccess\getLargeThumbUrl($valbum_id, $pic))."' alt=''>\n";
-			}
-			else
-			{
-				echo "    <span style='text-align: center;'>";
-				\ShowVirtualAlbum\show($valbum_id, $valbum, null, true, false, 2);
-				echo "</span>\n";
+				else if ($valbum['type'] == 'ALBUM')
+				{
+					$album_title = $valbum['title'];
+					
+					echo "\n<td><div class='alb_insight'><a href='".\MediaAccess\getAlbumUrl($valbum_id)."'>\n"
+						."  <span>";// - ".count($media_files_this_album)." elements
+					
+					if (isset($valbum["album_thumb_picture"]) && $valbum["album_thumb_picture"]!='')
+					{
+						$pic = $valbum["album_thumb_picture"];
+						if (strstr($pic, '/'))
+						{
+							$array_pics = explode('/', $valbum["album_thumb_picture"]);
+							$pic = $array_pics[array_rand($array_pics, 1)];
+						}
+						echo "    <img class='album_thumb_picture' src='".(\MediaAccess\getLargeThumbUrl($valbum_id, $pic))."' alt=''>\n";
+					}
+					else
+					{
+						echo "    <span style='text-align: center;'>";
+						\ShowVirtualAlbum\show($valbum_id, $valbum, null, true, false, 2);
+						echo "</span>\n";
+					}
+					
+					echo "    <h4><span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"."$album_title</span></h4>";
+					// style='position:absolute;'
+						
+					echo "  </span>\n"
+						."</a>";
+					if ($valbum['user'] != CONST_ADMIN_USER) echo getDeleteAndReorderButtons_($curr_user, $album_title);
+					echo "</div></td>\n";
+					
+					$j++;
+					if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}
+				}
+				else
+				{
+					die("l.".__LINE__." ".$valbum["type"]);
+				}
 			}
 			
-			echo "    <h4><span class='".($curr_user == CONST_ADMIN_USER?"admin":"normal")."'>"."$album_title</span></h4>";
-			// style='position:absolute;'
-				
-			echo "  </span>\n"
-				."</a>";
-			echo getDeleteAndReorderButtons_($curr_user, $album_title);
-			echo "</div></td>\n";
-			
-			$j++;
-			if (($j%CONST_NB_COLUMNS_LIST_ALBUMS)==0) {echo "</tr><tr>";$j = 0;}
-		}
-		else
-		{
-			die("l.".__LINE__." ".$valbum["type"]);
+			echo "</tr></table>";
+			if ($valbum['user'] != CONST_ADMIN_USER) echo getCreateVirtualAlbumOrGroupButtons_($curr_user);
+			echo "</div>\n\n";
 		}
 	}
-	echo "</tr></table>";
-	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
+	
+	if (!$display_albums_and_not_virtual_albums && $_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 	{
-		echo getCreateVirtualAlbumOrGroupButtons_($curr_user);
-		echo "</div>\n";
 		foreach (\VirtualAlbumsConf\getUsers(false) as $user)
 		{
 			if (\VirtualAlbumsConf\isUserConfEmpty($user))
