@@ -45,18 +45,21 @@ function showListOfAlbums($valbum_array, $display_albums_and_not_virtual_albums)
 			echo "\n\n<!-- new album list -->\n"
 				.'<div class="admin_box">';
 			
-			if ($curr_user == CONST_ADMIN_USER)
+			if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
 			{
-				//echo "<h2>Albums</h2>";
-			}
-			elseif ($curr_user == CONST_DEFAULT_USER)
-			{
-				$other_users = \VirtualAlbumsConf\getUsers(true);
-				echo "<h2>Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '')."</h2>";
-			}
-			else
-			{
-				echo "<h2>Visibility for user: <i>".$curr_user."</i></h2>";
+				if ($curr_user == CONST_ADMIN_USER)
+				{
+					//echo "<h2>Albums</h2>";
+				}
+				elseif ($curr_user == CONST_DEFAULT_USER)
+				{
+					$other_users = \VirtualAlbumsConf\getUsers(true);
+					echo "<h2>Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '')."</h2>";
+				}
+				else
+				{
+					echo "<h2>Visibility for user: <i>".$curr_user."</i></h2>";
+				}
 			}
 			echo "\n\n";
 			if ($curr_user == CONST_ADMIN_USER)
@@ -109,7 +112,7 @@ function showListOfAlbums($valbum_array, $display_albums_and_not_virtual_albums)
 						
 					echo "  </span>\n"
 						."</a>";
-					if ($valbum['user'] != CONST_ADMIN_USER) echo getDeleteAndReorderButtons_($curr_user, $album_title);
+					echo getDeleteAndReorderButtons_($curr_user, $album_title);
 					echo "</div></td>\n";
 					
 					$j++;
@@ -122,7 +125,10 @@ function showListOfAlbums($valbum_array, $display_albums_and_not_virtual_albums)
 			}
 			
 			echo "</tr></table>";
-			if ($valbum['user'] != CONST_ADMIN_USER) echo getCreateVirtualAlbumOrGroupButtons_($curr_user);
+			if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER && $valbum['user'] != CONST_ADMIN_USER)
+			{
+				echo getCreateVirtualAlbumOrGroupButtons_($curr_user);
+			}
 			echo "</div>\n\n";
 		}
 	}
