@@ -174,12 +174,14 @@
 			
 			foreach (ShowVirtualAlbum\getListOfDays($valbum) as $day => $nb_elements)
 			{
+				$onclick = " onClick=\"loadDay(".$valbum_id.",'".$day."')\"";
+				$is_insight = ($nb_elements>=CONST_NB_INSIGHT_PICTURES);
 				echo "\n<div class='new_day'>"
 					."\t<h3>".preg_replace('/:/', '-', $day)."</h3>"
 					."<div id='day-".$day."'>"
-					."<span onClick=\"loadDay(".$valbum_id.",'".$day."')\">";
+					."<span".($is_insight?$onclick:'').">";
 
-				ShowVirtualAlbum\show($valbum_id, $valbum, $day, true, true, null);
+				ShowVirtualAlbum\show($valbum_id, $valbum, $day, $is_insight, $is_insight, null);
 				
 				echo "</span>\n"
 					."</div>\n"
