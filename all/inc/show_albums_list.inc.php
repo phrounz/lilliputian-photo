@@ -49,7 +49,7 @@ function showListOfAlbums($user, $valbum_array)
 	$get_id = collapseId($user);
 	if (count($valbum_array) == 0)
 	{
-		echo "<div class='admin_box'><h2>Visibility for user: <i>".$user."</i></h2><p>Nothing is visible by this user.</p>";
+		echo "<div class='admin_box'><p>Nothing is yet visible for ".($user==CONST_DEFAULT_USER?"these users":"this user").".</p>";//<h2>Visibility for user: <i>".$user."</i></h2>
 		if ($user != CONST_DEFAULT_USER)
 		{
 			echo "<form action='?$get_id' method='POST'> "

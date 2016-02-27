@@ -201,7 +201,10 @@
 		}
 		else
 		{
-			ShowAlbumsList\showListOfAlbums(array_values($valbum_array)[0]['user'], $valbum_array);
+			if (count($valbum_array) > 0)
+			{
+				ShowAlbumsList\showListOfAlbums(array_values($valbum_array)[0]['user'], $valbum_array);
+			}
 		}
 	}
 ?>
