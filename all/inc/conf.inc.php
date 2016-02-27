@@ -30,4 +30,9 @@
 	define('CONST_HEIGHT_ALBUM_THUMB_PICTURE', 225);//150
 	define('CONST_WIDTH_ALBUM_INSIGHT_BOX', CONST_WIDTH_ALBUM_THUMB_PICTURE+20);//300
 	define('CONST_HEIGHT_ALBUM_INSIGHT_BOX', CONST_HEIGHT_ALBUM_THUMB_PICTURE+130);//225
+	
+	function collapseId($user)
+	{
+		return 'collapse_user_'.rtrim(strtr(base64_encode($user), '+/', '-_'), '=');
+	}
 ?>

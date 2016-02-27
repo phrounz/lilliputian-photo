@@ -4,11 +4,111 @@
 	require_once("conf.inc.php");
 	require_once("virtual_albums_conf.inc.php");
 	require_once("media_access.inc.php");
-	require_once("inc/show_albums_list.inc.php");
+	require_once("show_albums_list.inc.php");
 	
 //----------------------------------------------------------------------------------------------------------------------------------------------
 // public function
 //----------------------------------------------------------------------------------------------------------------------------------------------
+
+function showAllAdminInterface($valbum_array)
+{	
+	$all_get_ids = '';
+	$all_spans = '';
+	$array_of_valbum_array = \ShowAlbumsList\reorganizeIntoListOfListOfAlbums($valbum_array);
+	$array_get_ids = array();
+	foreach ($array_of_valbum_array as $user => $valbum_array)
+	{
+		if ($user != CONST_ADMIN_USER)
+		{
+			$get_id = collapseId($user);
+			array_push($array_get_ids, $get_id);
+			$all_get_ids .= '"'.$get_id.'",';
+			$title = '';
+			if ($user == CONST_DEFAULT_USER)
+			{
+				$other_users = \VirtualAlbumsConf\getUsers(true);
+				$title = "Visibility for all users".(count($other_users)>0 ? " except: <i>".implode(', ', $other_users)."</i>" : '');
+			}
+			else
+			{
+				$title = "Visibility for user: <i>$user</i>";
+			}
+			$all_spans .= '<span class="button_top" id="_'.$get_id.'" onclick=\'displayOnly("'.$get_id.'");\'>'.$title.'</span>';
+		}
+	}
+
+?>
+<div id="top_admin_menu">
+	<script type="text/javascript">
+		var coll = [
+			"collapse_list_of_albums", 
+			"collapse_album_management", 
+			<?php echo $all_get_ids; ?>
+			"collapse_visibility_add_user", 
+			"collapse_stats"
+			];
+		function displayOnly(id)
+		{
+			coll.forEach(function(entry) {
+				document.getElementById("_"+entry).style.backgroundColor="inherit";
+				document.getElementById(entry).style.display="none";
+			});
+			document.getElementById(id).style.display="block";
+			document.getElementById("_"+id).style.backgroundColor="#dddddd";
+		}
+	</script>
+	<span class="button_top" id="_collapse_list_of_albums" onclick='displayOnly("collapse_list_of_albums");'>Albums</span>
+	<span class="button_top" id="_collapse_album_management" onclick='displayOnly("collapse_album_management");'>Albums management</span>
+	<?php echo $all_spans; ?>
+	<span class="button_top" id="_collapse_visibility_add_user" onclick='displayOnly("collapse_visibility_add_user");'>Add user for visibility</span>
+	<span class="button_top" id="_collapse_stats" onclick='displayOnly("collapse_stats");'>Connection log</span>
+</div>
+<?php
+
+	echo '<div id="collapse_list_of_albums" style="display: '.(isset($_GET['collapse_list_of_albums'])?'block':'none').';">';
+	foreach ($array_of_valbum_array as $user => $valbum_array)
+	{
+		if ($user == CONST_ADMIN_USER) \ShowAlbumsList\showListOfAlbums(CONST_ADMIN_USER, $valbum_array);
+	}
+	echo "</div>\n\n";
+
+	$is_collapsed = isset($_GET['collapse_album_management']);
+	echo '<div id="collapse_album_management" style="display: '.($is_collapsed?'block':'none').';">';
+	showAdminAlbumManagement_();
+	echo "</div>\n\n";
+	
+	foreach ($array_of_valbum_array as $user => $valbum_array)
+	{
+		if ($user != CONST_ADMIN_USER)
+		{
+			$get_id = collapseId($user);
+			echo '<div id="'.$get_id.'" style="display: '.(isset($_GET[$get_id])?'block':'none').';">';
+			\ShowAlbumsList\showListOfAlbums($user, $valbum_array);
+			echo "</div>\n\n";
+		}
+	}
+	
+	echo '<div id="collapse_visibility_add_user" style="display: '.(isset($_GET['collapse_visibility_add_user'])?'block':'none').';">';
+	showAdminVisibilitySpecificUser_();
+	echo "</div>\n\n";
+	
+	echo '</div>';
+	if ($_SERVER['REMOTE_USER'] == CONST_ADMIN_USER)
+	{
+		echo '<div id="collapse_stats" style="display: none;">';
+		showStats_($valbum_array);
+		echo '</div>';
+	}
+	
+	// open good tab
+	foreach ($array_get_ids as $get_id)
+	{
+		if (isset($_GET[$get_id]))
+		{
+			echo '<script type="text/javascript">displayOnly("'.$get_id.'");</script>';
+		}
+	}
+}
 
 function doPostOperations()
 {
@@ -105,9 +205,11 @@ function doPostOperations()
 	return array($str_pst, $res);
 }
 
-//----------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------
+// private functions
+//----------------------------------------------------------------------------------------------------------------------------------------------
 
-function showAdminVisibilitySpecificUser()
+function showAdminVisibilitySpecificUser_()
 {
 	//----------------------------
 	// Create a new user
@@ -116,21 +218,23 @@ function showAdminVisibilitySpecificUser()
 		
 	//."<p>By default all authenticated users see what the <i>".CONST_DEFAULT_USER."</i> user sees. This allows to write specific rules for a given user.</p>"
 	//Note: you also need to add authentication for this user (e.g. in the <i>.htpasswd</i> file)
-	echo "<p>".htmlMiniForm("Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
+	echo "<p>".htmlMiniForm('?', "Add specific rights for the user <input type='text' name='valbum_newuser' value='' />", 'Add')."</p>";
 		
 	/*$removable_users_opts = getSelectUsers('valbum_removeuser', true);
 	if (strlen($removable_users_opts) > 0)
 	{
-		echo "<p>".htmlMiniForm("Remove specific rights for a user: $removable_users_opts", 'Remove')."</p>";
+		echo "<p>".htmlMiniForm('?', "Remove specific rights for a user: $removable_users_opts", 'Remove')."</p>";
 		//"<p>Note 2: you also need to remove authentication for this user (e.g. in the <i>.htpasswd</i> file).</p>"
 	}*/
 	echo "</div>\n";
 }
 
-function showAdminAlbumManagement()
+function showAdminAlbumManagement_()
 {
 	//----------------------------
 	// Album management
+	
+	$TARGET_PAGE = '?collapse_album_management';
 	
 	echo "\n<div class='admin_box'>\n";
 	//echo "<h2>Album management</h2>\n"
@@ -139,29 +243,29 @@ function showAdminAlbumManagement()
 		
 		."<p>It's advised to upload the albums manually (with an FTP client, for example) instead of using the buttons below, it's more practical to upload <i>en masse</i>.</p><ul>\n"
 			
-		."<li>".htmlMiniForm("Create an empty album <input type='text' name='album_create' />", "Create")."</li>\n"
+		."<li>".htmlMiniForm($TARGET_PAGE, "Create an empty album <input type='text' name='album_create' />", "Create")."</li>\n"
 		
-		."<li><form action='".getTargetPage()."' method='POST' enctype='multipart/form-data'>\n"
+		."<li><form action='$TARGET_PAGE' method='POST' enctype='multipart/form-data'>\n"
 		."Add file <input type='file' name='album_addmedia__file'>"
 		."in the album ".getSelectAlbums('album_addmedia__album')
 		."<input type='submit' value='Submit' />\n"
 		."</form></li>\n"
 		
-		."<li>".htmlMiniForm("Remove file <input type='text' name='album_removemedia_filename'>in the album ".getSelectAlbums('album_removemedia_album'), "Remove")."</li>\n";
+		."<li>".htmlMiniForm($TARGET_PAGE, "Remove file <input type='text' name='album_removemedia_filename'>in the album ".getSelectAlbums('album_removemedia_album'), "Remove")."</li>\n";
 		
 	$empty_albums = getSelectEmptyAlbums('album_remove');
-	if (strlen($empty_albums)>0) echo "<li>".htmlMiniForm("Remove an empty album $empty_albums", "Remove")."</li>\n";
+	if (strlen($empty_albums)>0) echo "<li>".htmlMiniForm($TARGET_PAGE, "Remove an empty album $empty_albums", "Remove")."</li>\n";
 		
 	echo "</ul>\n";
 	
 	echo "\n<h4>Generate thumbnails</h4>\n" // Thumbnail and reduced pictures generation
-		."<form action='".getTargetPage()."' method='POST'>You should press this button after modifying albums: "
+		."<form action='$TARGET_PAGE' method='POST'>You should press this button after modifying albums: "
 		."<input type='submit' value='Generate missing thumbnails' />"
 		."<input type='hidden' name='generate_thumbs' value='true' />"
 		."</form>\n\n";
 		
 	echo "\n<h4>Generate <i>.htaccess</i> files</h4>\n" // .htaccess files
-		."<form action='".getTargetPage()."' method='POST'>You should press this button after creating new albums (for security reasons): "
+		."<form action='$TARGET_PAGE' method='POST'>You should press this button after creating new albums (for security reasons): "
 		."<input type='submit' value='Generate missing .htaccess files' />"
 		."<input type='hidden' name='generate_htaccess' value='true' />"
 		."</form>\n\n";
@@ -169,7 +273,7 @@ function showAdminAlbumManagement()
 	echo "</div>\n\n";
 }
 
-function showStats()
+function showStats_()
 {	
 	echo '<script type="text/javascript" src="ajax/ajax_get_stats.js"></script>'."\n";
 	echo '<div class= "admin_box">
@@ -180,7 +284,7 @@ function showStats()
 					document.getElementById("_all_log").style.backgroundColor="inherit";
 					document.getElementById("_all_log_digest").style.backgroundColor="inherit";
 					document.getElementById("_last_log").style.backgroundColor="inherit";
-					document.getElementById("_"+id).style.backgroundColor="#cccccc";
+					document.getElementById("_"+id).style.backgroundColor="#dddddd";
 					loadStats(id);
 				}
 			</script>
@@ -188,13 +292,13 @@ function showStats()
 			<span class="button_top" id="_all_log_digest" onclick=\'loadOnly("all_log_digest");\'>All logs digest</span>
 			<span class="button_top" id="_last_log" onclick=\'loadOnly("last_log");\'>Only the last log (between 0 and 10kB)</span>
 		</p>
-		';//.($want_log ? "<span class='button_top'><a href='?collapse_stats'>Close</a></span>" : "")
+		';
 		
 	echo "<div id='stats'></div>\n";
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
-// private functions
+// very private functions
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
 function generateAllHtaccess_()
@@ -231,12 +335,10 @@ function getSelectUsers($name, $skip_default_user)
 	return count($opts)==0?'':"<select name='$name'>".implode('', $opts)."</select>";
 }
 
-function htmlMiniForm($html, $submit_button_caption)
+function htmlMiniForm($target_page, $html, $submit_button_caption)
 {
-	return "<form action='".getTargetPage()."' method='POST'>\n$html\n<input type='submit' value='$submit_button_caption' />\n</form>\n";
+	return "<form action='$target_page' method='POST'>\n$html\n<input type='submit' value='$submit_button_caption' />\n</form>\n";
 }
-
-function getTargetPage() { return '?collapse_list_of_albums'; }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------------
