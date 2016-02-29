@@ -32,6 +32,23 @@
 			file_put_contents("$output_folder/.htaccess", "Deny from all");
 		}
 		
+		//------------------------------
+		// read exif for rotation
+		$rotangle = 0;
+		$exif = exif_read_data($media_file, 0, true);
+		if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation']))
+		{
+			switch ($exif['IFD0']['Orientation'])
+			{
+				case 3:$rotangle=-180;break;
+				case 6:$rotangle=90;break;
+				case 8:$rotangle=-90;break;
+			}
+			
+		}
+		
+		//------------------------------
+		
 		ini_set('memory_limit', '-1');// Allocate all necessary memory for the image.
 		
 		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
@@ -63,7 +80,7 @@
 			if (!file_exists($output_file))
 			{
 				echo "Generating $output_file from $media_file ... ";
-				$img->GenerateThumbFile($media_file, "$output_file.lock");
+				$img->GenerateThumbFile($media_file, "$output_file.lock", $rotangle);
 				echo "ok.\n<br />";
 				rename("$output_file.lock", $output_file);
 			}
@@ -168,7 +185,7 @@ class Zubrag_image {
   }
  
   // generate thumb from image and save it
-  function GenerateThumbFile($from_name, $to_name) {
+  function GenerateThumbFile($from_name, $to_name, $rotangle) {
  
     // if src is URL then download file first
     $temp = false;
@@ -270,8 +287,16 @@ class Zubrag_image {
       $this->max_x, $this->max_y,       // dstW, dstH
       $orig_x, $orig_y);    // srcW, srcH
  
-    // save thumb file
-    $this->SaveImage($ni, $to_name);
+	if ($rotangle != 0)
+	{
+		$nirot = imagerotate($ni, -$rotangle, 0);
+		$this->SaveImage($nirot, $to_name);
+	}
+	else
+	{
+		// save thumb file
+		$this->SaveImage($ni, $to_name);
+	}
 	echo "(saving) ";
 
     if($temp) {
