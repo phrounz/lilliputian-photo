@@ -14,6 +14,29 @@ function showMediaPage($valbum_id, $valbum, $media_id)
 		"<video id='the_media' src='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."' controls width='100%'></video>" :
 		"<a href='".\MediaAccess\getMediaUrl($valbum_id, $media_id)."'><img id='the_media' src='".\MediaAccess\getLargeThumbUrl($valbum_id, $media_id)."' alt='' style='height: 750px;'/></a>";
 	
+	{
+		$valbum_array = \VirtualAlbumsConf\listVirtualAlbums();
+		$album = isset($valbum_id) && isset($valbum_array[$valbum_id]) ? $valbum_array[$valbum_id]["album"] : null;
+		if (isset($album))
+		{
+			$exif = exif_read_data(\MediaAccess\getRealMediaFile($album, $media_id), 0, true);
+			if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation']) && !isset($_GET['rot']) 
+				&& !isset($_GET['anti_rot']) && !isset($_GET['anti_rot']) && !isset($_GET['inverse_rot']) && !isset($_GET['no_rot']))
+			{
+				switch ($exif['IFD0']['Orientation'])
+				{
+					case 3:$rotangle=-180;break;
+					case 6:$rotangle=90;break;
+					case 8:$rotangle=-90;break;
+				}
+				echo "<style type='text/css'>
+					#the_media {-moz-transform:rotate(${rotangle}deg);-webkit-transform:rotate(${rotangle}deg);
+					-o-transform:rotate(${rotangle}deg);-ms-transform:rotate($rotangledeg);transform:rotate(${rotangle}deg);}
+					</style>";//echo "==== ".$exif['IFD0']['Orientation']." ${rotangle}deg =====";
+			}
+		}
+	}
+		
 	$all_commenting = '';
 	$php_this_media = \MediaAccess\getMediaPageUrl($valbum_id, $media_id);
 	
@@ -48,7 +71,7 @@ function showMediaPage($valbum_id, $valbum, $media_id)
 	
 	$all_commenting .= "<br /><br />Orientation: "
 		."<a href='$php_this_media&amp;anti_rot'>-90&deg;</a> / "
-		."<a href='$php_this_media'>normal</a> / "
+		."<a href='$php_this_media&amp;no_rot'>normal</a> / "
 		."<a href='$php_this_media&amp;rot'>90&deg;</a> / "
 		."<a href='$php_this_media&amp;inverse_rot'>180&deg;</a>";
 	
