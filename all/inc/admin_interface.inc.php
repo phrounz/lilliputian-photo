@@ -284,6 +284,7 @@ function showStats_()
 					document.getElementById("_all_log").style.backgroundColor="inherit";
 					document.getElementById("_all_log_digest").style.backgroundColor="inherit";
 					document.getElementById("_last_log").style.backgroundColor="inherit";
+					document.getElementById("_all_log_per_ip").style.backgroundColor="inherit";
 					document.getElementById("_"+id).style.backgroundColor="#dddddd";
 					loadStats(id);
 				}
@@ -291,6 +292,7 @@ function showStats_()
 			<span class="button_top" id="_all_log" onclick=\'loadOnly("all_log");\'>All logs (might be huge)</span>
 			<span class="button_top" id="_all_log_digest" onclick=\'loadOnly("all_log_digest");\'>All logs digest</span>
 			<span class="button_top" id="_last_log" onclick=\'loadOnly("last_log");\'>Only the last log (between 0 and 10kB)</span>
+			<span class="button_top" id="_all_log_per_ip" onclick=\'loadOnly("all_log_per_ip");\'>All logs per ip</span>
 		</p>
 		';
 		

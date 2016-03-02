@@ -15,11 +15,33 @@
 		
 		if ($ip != '127.0.0.1')
 		{
-			$contents = fetch("http://www.telize.com/geoip/$ip");
-			$details = json_decode($contents);
-			$city = $details->city;
-			$country = $details->country;
-			$isp = $details->isp;
+			$city = null;
+			$country = null;
+			
+			if (!isset($city) || !isset($country))
+			{
+				$contents = fetch("http://www.telize.com/geoip/$ip");
+				$details = json_decode($contents);
+				$city = $details->city;
+				$country = $details->country;
+				$isp = $details->isp;
+			}
+			
+			if (!isset($city) || !isset($country))
+			{
+				$contents = fetch("http://ipinfo.io/$ip/json");
+				$details = json_decode($contents);		
+				$city = $details->city;
+				$country = $details->country;
+			}
+			
+			if (!isset($city) || !isset($country))
+			{
+				$contents = fetch('http://www.geoplugin.net/php.gp?ip='.$ip);
+				$addrDetailsArr = unserialize($contents); 
+				$city = $addrDetailsArr['geoplugin_city'];
+				$country = $addrDetailsArr['geoplugin_countryName'];
+			}
 			
 			if (!isset($city) || !isset($country))
 			{
@@ -29,24 +51,7 @@
 				$country = $details->country_code;
 			}
 			
-			if (!isset($city) || !isset($country))
-			{
-				$contents = fetch("https://ipinfo.io/$ip/json");
-				$details = json_decode($contents);		
-				$city = $details->city;
-				$country = $details->country;
-			
-			}
-			
-			if (!isset($city) || !isset($country))
-			{
-				$contents = fetch('https://www.geoplugin.net/php.gp?ip='.$ip);
-				$addrDetailsArr = unserialize($contents); 
-				$city = $addrDetailsArr['geoplugin_city'];
-				$country = $addrDetailsArr['geoplugin_countryName'];
-			}
-			
-			$ua = substr($_SERVER['HTTP_USER_AGENT'], 0, 30);
+			$ua = substr($_SERVER['HTTP_USER_AGENT'], 0, 60);
 
 			if (!file_exists(dirname(CONST_FILE_STATS)))
 			{
