@@ -17,6 +17,17 @@
 		{
 			$city = null;
 			$country = null;
+			$isp = null;
+			
+			if (!isset($city) || !isset($country))
+			{
+				$contents = fetch("http://ipinfo.io/$ip/json");
+				$details = json_decode($contents);		
+				$city = $details->city;
+				$country = $details->country;
+				$isp = $details->org;
+				//echo "=== $city $country $isp $contents http://ipinfo.io/$ip/json ===";
+			}
 			
 			if (!isset($city) || !isset($country))
 			{
@@ -25,14 +36,6 @@
 				$city = $details->city;
 				$country = $details->country;
 				$isp = $details->isp;
-			}
-			
-			if (!isset($city) || !isset($country))
-			{
-				$contents = fetch("http://ipinfo.io/$ip/json");
-				$details = json_decode($contents);		
-				$city = $details->city;
-				$country = $details->country;
 			}
 			
 			if (!isset($city) || !isset($country))
@@ -72,7 +75,7 @@
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $host);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_USERAGENT, 'geoPlugin PHP Class v1.0');
+			curl_setopt($ch, CURLOPT_USERAGENT, 'geoPlugin PHP Class v1.0');//Mozilla/5.0 (Windows NT 6.0; rv:10.0) Gecko/20100101 Firefox/10.0
 			$response = curl_exec($ch);
 			curl_close ($ch);
 		} else if ( ini_get('allow_url_fopen') ) {
