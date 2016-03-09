@@ -51,12 +51,13 @@
 			sort($lines);
 			$groups = array();
 			$last_group = null;
+			$last_date = null;
 			foreach ($lines as $line)
 			{
 				list($date_and_time, $path, $ip_adress, $user, $city, $country, $isp, $ua) = explode("\t", $line);
 				if (!isset($last_group) || $last_group["ip"] != $ip_adress)
 				{
-					$last_group["date_end"] = $date_and_time;
+					$last_group["date_end"] = $last_date;
 					array_push($groups, $last_group);
 					$last_group = array(
 						"ip" => $ip_adress, "date_begin" => $date_and_time,
@@ -67,17 +68,20 @@
 				$last_group["country"][$country] = 1;
 				$last_group["isp"][$isp] = 1;
 				$last_group["ua"][$ua] = 1;
+				$last_date = $date_and_time;
 			}
 			if (isset($last_group))
 			{
 				$last_group["date_end"] = $date_and_time;
 				array_push($groups, $last_group);
 			}
+			$my_ip = $_SERVER['REMOTE_ADDR'];
 			sort($lines);
 			foreach ($groups as $group)
 			{
+				$modstyle=($my_ip==$group["ip"]?' style="color: blue;">(your ip) ':'>');
 				echo "<tr>";
-				echo "<td>".$group["ip"]."</td><td>".$group["date_begin"]."</td><td>".$group["date_end"]."</td>";
+				echo "<td$modstyle".$group["ip"]."</td><td>".$group["date_begin"]."</td><td>".$group["date_end"]."</td>";
 				echo "<td>".implode(',', array_keys($group["users"]))."</td>";
 				echo "<td>".implode(',', array_keys($group["city"]))."</td>";
 				echo "<td>".implode(',', array_keys($group["country"]))."</td>";
