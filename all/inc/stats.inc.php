@@ -54,6 +54,8 @@
 				$country = $details->country_code;
 			}
 			
+			// see also https://www.iplocation.net/
+			
 			$ua = substr($_SERVER['HTTP_USER_AGENT'], 0, 60);
 
 			if (!file_exists(dirname(CONST_FILE_STATS)))
