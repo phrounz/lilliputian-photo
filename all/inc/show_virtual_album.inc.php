@@ -13,30 +13,18 @@
 //----------------------------------------------
 // get an associative array giving the number of elements per day of the album $album
 
-function getListOfDays($valbum)
+function getListOfDays($date_media_files)
 {
-	$album = $valbum['album'];
-	$from_date = $valbum['from_date'];
-	$to_date = $valbum['to_date'];
-	
 	$days_album = array();
-	foreach (glob(\MediaAccess\getAlbumDir($album)."/*") as $media_file)
+	foreach ($date_media_files as $media_file => $date_file)
 	{
-		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
-		if (\MediaInfos\isReallyAMediaFile($media_file))
+		//echo "$media_file => $date_file<br />";
+		$day_file = substr($date_file, 0, 10);
+		if (!isset($days_album[$day_file]))
 		{
-			$date_file = \MediaInfos\getDateTaken($media_file);
-			
-			if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
-			{
-				$day_file = substr($date_file, 0, 10);
-				if (!isset($days_album[$day_file]))
-				{
-					$days_album[$day_file] = 0;
-				}
-				$days_album[$day_file] += 1;
-			}
+			$days_album[$day_file] = 0;
 		}
+		$days_album[$day_file] += 1;
 	}
 	ksort($days_album);
 	return $days_album;
@@ -48,8 +36,8 @@ function getListOfDays($valbum)
 function getNextMedia($valbum, $media_id)
 {
 	$next_one = false;
-	$is_cut = false;
-	foreach (getListOfDatePerMedias($valbum['album'], $valbum['from_date'], $valbum['to_date'], false, $is_cut) as $media_file => $date)
+	$mediasdate_map = getListOfDatePerMediasFromValbum($valbum, false);
+	foreach ($mediasdate_map as $media_file => $date)
 	{
 		if ($media_file == \MediaAccess\getRealMediaFile($valbum['album'], $media_id)) $next_one = true;
 		else if ($next_one) return basename($media_file);
@@ -59,29 +47,38 @@ function getNextMedia($valbum, $media_id)
 
 //----------------------------------------------
 
-function getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, &$is_cut)
+function getListOfDatePerMediasFromValbum($valbum, $limit_insight_in_list_albums)
 {
+	$album = $valbum['album'];
+	$from_date = $valbum['from_date'];
+	$to_date = $valbum['to_date'];
+	$is_exclude = $valbum['is_exclude'];
+	$exclude_include_list_array = explode('/', $valbum['exclude_include_list']);
+	
 	$date_media_files = array();
 	$i = 0;
 	$is_cut = false;
 	$media_files = glob(\MediaAccess\getAlbumDir($album)."/*");
 	foreach ($media_files as $media_file)
 	{
-		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
-		if (\MediaInfos\isReallyAMediaFile($media_file))
+		$is_in_array = in_array(basename($media_file), $exclude_include_list_array);
+		if ((!$is_exclude && $is_in_array) || ($is_exclude && !$is_in_array))
 		{
-			$date_file = \MediaInfos\getDateTaken($media_file);
-			
-			if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
+			$ext = pathinfo($media_file, PATHINFO_EXTENSION);
+			if (\MediaInfos\isReallyAMediaFile($media_file))
 			{
-				$date_media_files[$media_file] = $date_file;
-				$i += 1;
+				$date_file = \MediaInfos\getDateTaken($media_file);
+				
+				if ((!isset($from_date) || strcmp($date_file, $from_date) >= 0) && (!isset($to_date) || strcmp($date_file, $to_date) <= 0))
+				{
+					$date_media_files[$media_file] = $date_file;
+					$i += 1;
+				}
 			}
-		}
-		if ($is_insight && $i>=CONST_NB_INSIGHT_PICTURES)
-		{
-			if ($i<count($media_files)) $is_cut = true;
-			break;
+			if ($limit_insight_in_list_albums && $i>=CONST_NB_COLUMNS_LIST_ALBUMS)
+			{
+				if ($i<count($media_files)) break;
+			}
 		}
 	}
 	
@@ -92,61 +89,43 @@ function getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, &$is_
 
 //----------------------------------------------
 
-function show($valbum_id, $valbum, $day, $is_insight, $show_ext_dots, $line_return_every_or_null)
+function showVirtualAlbum($valbum_id, $valbum, $day_or_null, $is_insight, $show_ext_dots, $line_return_every_or_null)
 {
-	$from_date = isset($valbum['from_date']) ? $valbum['from_date'] : '';
-	$to_date = isset($valbum['to_date']) ? $valbum['to_date'] : 'ZZZZZZZZZZZZZZZZZZZ';
-	
-	showVirtualAlbum_(
-		$valbum_id, 
-		$valbum['album'], 
-		isset($day) && strcmp($day, $from_date) > 0 ? $day : $from_date, 
-		isset($day) && strcmp($day."ZZZZZZZZZZ", $to_date) < 0 ? $day."ZZZZZZZZZZ" : $to_date, 
-		$valbum['comments_permissions'], 
-		$valbum['exclude_include_list'], 
-		$valbum['is_exclude'], 
-		$is_insight,
-		$show_ext_dots,
-		$line_return_every_or_null);
+	$date_media_files = getListOfDatePerMediasFromValbum($valbum, false);
+	showVirtualAlbumDayOrWhole($valbum_id, $valbum, $date_media_files, $is_insight, $is_insight, $show_ext_dots, $line_return_every_or_null, $day_or_null);
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
-// private functions
-//----------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------
 
-function showVirtualAlbum_(
-	$valbum_id, $album, $from_date, $to_date, $comments_permissions, $exclude_include_list, 
-	$is_exclude, $is_insight, $show_ext_dots, $line_return_every_or_null)
+function showVirtualAlbumDayOrWhole($valbum_id, $valbum, $date_media_files, $is_insight, $is_cut, $show_ext_dots, $line_return_every_or_null, $day_or_null)
 {
-	$is_cut = false;
-	$date_media_files = getListOfDatePerMedias($album, $from_date, $to_date, $is_insight, $is_cut);
-	$day_mark = null;
-	
 	$i = 0;
-	$exclude_include_list_array = explode('/', $exclude_include_list);
 	foreach($date_media_files as $media_file => $date_file)
 	{
 		$ext = pathinfo($media_file, PATHINFO_EXTENSION);
-		$day = substr($date_file, 0, 10);
-		$media_id = basename($media_file);
-		
-		$is_in_array = in_array($media_id, $exclude_include_list_array);
-		if ((!$is_exclude && $is_in_array) || ($is_exclude && !$is_in_array))
+		$day_file = substr($date_file, 0, 10);
+		if (!isset($day_or_null) || ($day_or_null == $day_file))
 		{
+			$media_id = basename($media_file);
+			
 			if (isset($line_return_every_or_null) && $i % $line_return_every_or_null == 0) echo "<br />";
-			showMediaThumb_($valbum_id, $album, $media_id, !$is_insight, !$is_insight && strpos($comments_permissions, 'R')!==FALSE);
+			showMediaThumb_($valbum_id, $valbum['album'], $media_id, !$is_insight, !$is_insight && strpos($valbum['comments_permissions'], 'R')!==FALSE);
 			$i++;
+		}
+		if ($is_insight && $i>=CONST_NB_INSIGHT_PICTURES)
+		{
+			if ($i<count($date_media_files)) break;
 		}
 	}
 	if ($is_cut && $show_ext_dots)
 	{
 		echo "<img src='three_dots.png' alt='...' class='three_dots' />";
 	}
-	
-	return $i;
 }
 
-//----------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------
+// private functions
+//----------------------------------------------------------------------------------------------------------------------------------------------
 
 function showMediaThumb_($valbum_id, $album, $media_id, $add_link, $add_comment_insight)
 {

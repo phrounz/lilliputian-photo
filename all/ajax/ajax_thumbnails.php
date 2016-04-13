@@ -20,8 +20,7 @@
 			if (isset($valbum) && $valbum['type'] == 'ALBUM' && $valbum['user'] == CONST_ADMIN_USER)
 			{
 				$album = $valbum['album'];
-				$is_cut = false;
-				foreach (\ShowVirtualAlbum\getListOfDatePerMedias($album, $valbum["from_date"], $valbum["to_date"], false, $is_cut) as $media_file => $date)
+				foreach (\ShowVirtualAlbum\getListOfDatePerMediasFromValbum($valbum, false) as $media_file => $date)
 				{
 					$media_id = basename($media_file);
 					

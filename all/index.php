@@ -172,7 +172,9 @@
 		{
 			$valbum = $valbum_array[$valbum_id];
 			
-			foreach (ShowVirtualAlbum\getListOfDays($valbum) as $day => $nb_elements)
+			$date_media_files = ShowVirtualAlbum\getListOfDatePerMediasFromValbum($valbum);
+			
+			foreach (ShowVirtualAlbum\getListOfDays($date_media_files) as $day => $nb_elements)
 			{
 				$onclick = " onClick=\"loadDay(".$valbum_id.",'".$day."')\"";
 				$is_insight = ($nb_elements>=CONST_NB_INSIGHT_PICTURES);
@@ -181,7 +183,7 @@
 					."<div id='day-".$day."'>"
 					."<span".($is_insight?$onclick:'').">";
 
-				ShowVirtualAlbum\show($valbum_id, $valbum, $day, $is_insight, $is_insight, null);
+				ShowVirtualAlbum\showVirtualAlbumDayOrWhole($valbum_id, $valbum, $date_media_files, $is_insight, $is_insight, $is_insight, null, $day);
 				
 				echo "</span>\n"
 					."</div>\n"
