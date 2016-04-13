@@ -89,9 +89,9 @@ function getListOfDatePerMediasFromValbum($valbum, $limit_insight_in_list_albums
 
 //----------------------------------------------
 
-function showVirtualAlbum($valbum_id, $valbum, $day_or_null, $is_insight, $show_ext_dots, $line_return_every_or_null)
+function showVirtualAlbum($valbum_id, $valbum, $day_or_null, $is_insight, $show_ext_dots, $line_return_every_or_null, $limit_insight_in_list_albums)
 {
-	$date_media_files = getListOfDatePerMediasFromValbum($valbum, false);
+	$date_media_files = getListOfDatePerMediasFromValbum($valbum, $limit_insight_in_list_albums);
 	showVirtualAlbumDayOrWhole($valbum_id, $valbum, $date_media_files, $is_insight, $is_insight, $show_ext_dots, $line_return_every_or_null, $day_or_null);
 }
 

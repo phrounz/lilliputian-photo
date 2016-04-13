@@ -19,6 +19,6 @@
 	// display the image/video
 	if (isset($valbum) && $valbum['type'] == 'ALBUM')
 	{
-		\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum, $day, false, true, null);
+		\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum, $day, false, true, null, false);
 	}
 ?>

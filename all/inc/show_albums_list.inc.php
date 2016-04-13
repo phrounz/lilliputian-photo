@@ -108,8 +108,7 @@ function showListOfAlbums($user, $valbum_array)
 				else
 				{
 					echo "    <span style='text-align: center;'>";
-					$date_media_files = \ShowVirtualAlbum\getListOfDatePerMediasFromValbum($valbum, true);
-					\ShowVirtualAlbum\showVirtualAlbumDayOrWhole($valbum_id, $valbum, $date_media_files, true, true, false, 2, null);
+					\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum, $day, true, false, 2, true);
 					echo "</span>\n";
 				}
 				
