@@ -5,7 +5,7 @@ See also other stuff my `web site <http://www.volatiledove.com>`_.
 Everything is made by me, except the code of thumbnail image generation based on code by zubrag.com (see `here <http://www.zubrag.com/scripts/website-thumbnail-generator.php>`_ and  `here <http://www.zubrag.com/forum/index.php/board,13.0.html>`_).
 
 What it looks like :
- * `administration: (Edit: this is old, the new administration interface looks different and more organized) <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/admin.jpg>`_
+ * administration: `example 1 <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/admin1.jpg>`_ ,  `example 2 <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/admin1.jpg>`_
  * `user albums list page <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/user_list.jpg>`_
  * `user album page <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/user_album.jpg>`_
  *  `user media page <https://raw.githubusercontent.com/phrounz/lilliputian-photo/master/screenshots/user_media.jpg>`_
