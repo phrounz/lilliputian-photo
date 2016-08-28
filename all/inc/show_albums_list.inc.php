@@ -108,7 +108,7 @@ function showListOfAlbums($user, $valbum_array)
 				else
 				{
 					echo "    <span style='text-align: center;'>";
-					\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum, $day, true, false, 2, true);
+					\ShowVirtualAlbum\showVirtualAlbum($valbum_id, $valbum, null, true, false, 2, true);
 					echo "</span>\n";
 				}
 				
